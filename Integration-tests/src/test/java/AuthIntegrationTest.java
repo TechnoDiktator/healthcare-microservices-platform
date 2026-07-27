@@ -48,6 +48,38 @@ public class AuthIntegrationTest {
     }
 
 
+    @Test
+    public void shouldReturnUnauthorizedWithInValidLogin(){
+        //three phases of an inegration test
+        //1. Arrange
+        //2. Act
+        //3. Assert
+
+        String loginPayload = """
+            {
+                "email":"invalidemailr@test.com",
+                "password": "invalidpassword"
+            }
+            
+            """;
+        given()
+        .contentType("application/json")
+        .body(loginPayload)
+        .when()
+        .post("/auth/login")
+        .then()
+        .statusCode(401);
+
+        System.out.println("Invalid Login Test successful");
+
+
+    }
+
+
+
+
+
+
 
 
 }
