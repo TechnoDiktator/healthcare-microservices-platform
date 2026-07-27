@@ -1,0 +1,229 @@
+A production-style architecture
+                    +----------------------+
+                    |      API Gateway     |
+                    +----------+-----------+
+                               |
+                JWT (Patient Role)
+                               |
+                               v
+                    +----------------------+
+                    |    Doctor Service    |
+                    +----------------------+
+                     |                |
+                     | MongoDB        |
+                     | (Doctors,      |
+                     | Prescriptions) |
+                     |
+                     | gRPC
+                     v
+                +----------------------+
+                |    Billing Service   |
+                +----------------------+
+                     |
+                     | PostgreSQL
+                     | (Bills)
+                     |
+                     +----------------------+
+
+Notice that:
+
+Doctor Service owns doctor and prescription data.
+Billing Service owns bill data.
+Billing Service never connects to Doctor Service's MongoDB.
+Step 1: Patient logs in
+
+Authentication Service returns
+
+JWT
+
+with
+
+ROLE_PATIENT
+Step 2
+
+Patient calls
+
+POST /api/prescriptions
+
+with
+
+{
+    "doctorId":"DOC-101",
+    "patientId":"PAT-25",
+    "symptoms":"Fever and headache"
+}
+Step 3
+
+Doctor Service stores
+
+Consultation Request
+
+or
+
+Appointment
+Step 4
+
+Doctor reviews it.
+
+Doctor selects medicines from a catalog.
+
+Example
+
+Paracetamol
+Vitamin C
+Crocin
+
+The catalog can initially be hardcoded or stored in a separate collection. In a larger system, you might eventually introduce a dedicated Pharmacy or Inventory Service, but that's not necessary at this stage.
+
+Step 5
+
+Doctor generates prescription
+
+Prescription
+
+Doctor
+Patient
+Medicine List
+Consultation Fee
+
+Store this in MongoDB.
+
+Step 6
+
+Now Doctor Service calls Billing Service.
+
+Instead of
+
+CreateBillingAccount()
+
+I would define
+
+service BillingService {
+
+    rpc GenerateBill(GenerateBillRequest)
+        returns (GenerateBillResponse);
+
+}
+Request
+message GenerateBillRequest {
+
+    string prescriptionId = 1;
+
+    string patientId = 2;
+
+    string doctorId = 3;
+
+    double consultationFee = 4;
+
+    repeated Medicine medicines = 5;
+}
+Medicine
+message Medicine {
+
+    string name = 1;
+
+    int32 quantity = 2;
+
+    double price = 3;
+}
+
+Notice that the Billing Service doesn't need to query another database because the Doctor Service already provides the medicine names, quantities, and prices.
+
+Billing Service
+
+Billing Service receives
+
+GenerateBillRequest
+
+Computes
+
+consultationFee
++
+
+medicine1
+
++
+
+medicine2
+
++
+
+medicine3
+
+Creates
+
+Bill
+
+Stores
+
+Bill
+
+billId
+patientId
+prescriptionId
+amount
+status
+createdAt
+
+inside PostgreSQL.
+
+Returns
+
+message GenerateBillResponse {
+
+    string billId = 1;
+
+    double totalAmount = 2;
+
+    string paymentStatus = 3;
+}
+Doctor Service
+
+Receives
+
+billId
+
+totalAmount
+
+Returns
+
+{
+    "prescriptionId":"P123",
+    "billId":"B789",
+    "totalAmount":820,
+    "status":"GENERATED"
+}
+What about CreateBillingAccount?
+
+I would actually remove it.
+
+A billing system usually doesn't need a separate "billing account" for each patient. Instead, it creates bills or invoices when services are rendered.
+
+Your gRPC API could evolve into something like this:
+
+service BillingService {
+
+    rpc GenerateBill(GenerateBillRequest)
+        returns (GenerateBillResponse);
+
+    rpc GetBill(GetBillRequest)
+        returns (BillResponse);
+
+    rpc PayBill(PayBillRequest)
+        returns (PaymentResponse);
+}
+
+That aligns much more closely with the business capability of the Billing Service.
+
+Looking further ahead
+
+Given that you're building this project to demonstrate microservices, distributed systems, and gRPC, I'd structure the domain around real hospital workflows:
+
+Auth Service: authentication and authorization (JWT, roles).
+Patient Service: patient profiles and demographics.
+Doctor Service: doctor profiles, consultations, and prescriptions.
+Billing Service: invoices, payment status, and billing calculations.
+Appointment Service (optional): booking and managing appointments.
+Notification Service (optional): sending emails or SMS for appointment confirmations, prescription availability, or payment reminders.
+
+This design demonstrates clear service boundaries, each service owns its data, and all inter-service communication happens through well-defined APIs rather than direct database access. For interviews, that's a strong architecture because it reflects common production microservice practices.

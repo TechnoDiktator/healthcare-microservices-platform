@@ -1,37 +1,91 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-
 option java_package = "billing";
 
-service BillingServices {
+service BillingService {
 
-  rpc CreateBillingAccount (BillingRequest) returns (BillingResponse) ;
+  // Called by Doctor Service after a prescription is created
+  rpc GenerateBill(GenerateBillRequest) returns (GenerateBillResponse);
+
+  // Fetch a bill by ID
+  rpc GetBill(GetBillRequest) returns (BillResponse);
+
+  // Mark a bill as paid
+  rpc PayBill(PayBillRequest) returns (PaymentResponse);
 
 }
 
-message BillingRequest {
-  string patientId = 1;
-  string name  = 2;
-  string email = 3;
+message GenerateBillRequest {
+
+  string prescriptionId = 1;
+
+  string patientId = 2;
+
+  string doctorId = 3;
+
+  double consultationFee = 4;
+
+  repeated Medicine medicines = 5;
 
 }
 
-message BillingResponse {
-  string accountId = 1;
-  string status = 2;
+message Medicine {
+
+  string medicineName = 1;
+
+  int32 quantity = 2;
+
+  double unitPrice = 3;
+
 }
 
+message GenerateBillResponse {
 
+  string billId = 1;
 
+  double totalAmount = 2;
 
+  string paymentStatus = 3;
 
+}
 
+message GetBillRequest {
 
+  string billId = 1;
 
+}
 
+message BillResponse {
 
+  string billId = 1;
 
+  string prescriptionId = 2;
 
+  string patientId = 3;
 
+  string doctorId = 4;
 
+  double consultationFee = 5;
+
+  double medicineCost = 6;
+
+  double totalAmount = 7;
+
+  string paymentStatus = 8;
+
+}
+
+message PayBillRequest {
+
+  string billId = 1;
+
+}
+
+message PaymentResponse {
+
+  string billId = 1;
+
+  string paymentStatus = 2;
+
+}
