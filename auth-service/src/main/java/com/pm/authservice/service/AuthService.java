@@ -59,7 +59,7 @@ public class AuthService {
         }
     }
 
-    public void register(RegisterRequestDTO request) {
+    public User register(RegisterRequestDTO request) {
 
         if (userService.findByEmail(request.getEmail()).isPresent()) {
             throw new EmailAlreadyExistsException("Email already exists");
@@ -77,7 +77,7 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(request.getRole());
 
-        userService.save(user);
+        return userService.save(user);
     }
 
     public Optional<User> getAuthenticatedUser(String token) {

@@ -1,9 +1,7 @@
 package com.pm.authservice.controller;
 
-import com.pm.authservice.dto.AuthenticatedUserResponseDTO;
-import com.pm.authservice.dto.LoginRequestDTO;
-import com.pm.authservice.dto.LoginResponseDTO;
-import com.pm.authservice.dto.RegisterRequestDTO;
+import com.pm.authservice.dto.*;
+import com.pm.authservice.model.User;
 import com.pm.authservice.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.HttpStatus;
@@ -56,11 +54,20 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Void> register( @RequestBody RegisterRequestDTO request) {
-        authService.register(request);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<RegisterResponseDTO> register(
+            @RequestBody RegisterRequestDTO request) {
+
+        User user = authService.register(request);
+
+        RegisterResponseDTO response = new RegisterResponseDTO(
+                user.getId(),
+                user.getEmail(),
+                user.getRole().name(),
+                "User registered successfully"
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(response);
     }
-
-
 
 }
