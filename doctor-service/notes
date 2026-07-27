@@ -1,0 +1,24 @@
+doctor-service
+│
+├── controller
+│     DoctorController.java
+│     PrescriptionController.java
+│
+├── service
+│     DoctorService.java
+│     PrescriptionService.java
+│
+├── repository
+│     DoctorRepository.java
+│     PrescriptionRepository.java
+│
+├── model
+│     Doctor.java
+│     Prescription.java
+│
+├── dto
+│     PrescriptionRequestDTO.java
+│     PrescriptionResponseDTO.java
+│
+└── grpc
+      BillingServiceGrpcClient.java

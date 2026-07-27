@@ -1,4 +1,4 @@
-package com.pm.authservice.seeded;
+package com.pm.authservice.seeder;
 import com.pm.authservice.model.Role;
 import com.pm.authservice.model.User;
 import com.pm.authservice.repository.UserRepository;
@@ -32,6 +32,7 @@ public class AdminSeeder implements CommandLineRunner {
         admin.setPassword(passwordEncoder.encode("admin123"));
         admin.setRole(Role.ADMIN);
 
+        System.out.println("Admin registered"  + admin);
         userRepository.save(admin);
     }
 }

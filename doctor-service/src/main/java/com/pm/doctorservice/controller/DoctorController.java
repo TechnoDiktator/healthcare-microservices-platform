@@ -6,6 +6,7 @@ import com.pm.doctorservice.service.DoctorService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class DoctorController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public DoctorResponseDTO createDoctor(
             @Valid @RequestBody DoctorRequestDTO requestDTO) {
 
@@ -29,18 +31,21 @@ public class DoctorController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public DoctorResponseDTO getDoctorById(@PathVariable String id) {
 
         return doctorService.getDoctorById(id);
     }
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public List<DoctorResponseDTO> getAllDoctors() {
 
         return doctorService.getAllDoctors();
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public DoctorResponseDTO updateDoctor(
             @PathVariable String id,
             @Valid @RequestBody DoctorRequestDTO requestDTO) {
@@ -50,12 +55,14 @@ public class DoctorController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteDoctor(@PathVariable String id) {
 
         doctorService.deleteDoctor(id);
     }
 
     @GetMapping("/specialization/{specialization}")
+    @PreAuthorize("isAuthenticated()")
     public List<DoctorResponseDTO> getDoctorsBySpecialization(
             @PathVariable String specialization) {
 
@@ -63,6 +70,7 @@ public class DoctorController {
     }
 
     @GetMapping("/recommend")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<DoctorResponseDTO>> recommendDoctors(
             @RequestParam String specialization) {
 
