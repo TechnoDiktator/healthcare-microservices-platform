@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "doctor";
+option java_outer_classname = "DoctorProto";
+
+service DoctorServices {
+
+  rpc GetDoctorsBySpecialization(DoctorSpecializationRequest)
+      returns (DoctorListResponse);
+
+}
+
+message DoctorSpecializationRequest {
+  string specialization = 1;
+}
+
+message DoctorResponse {
+
+  string id = 1;
+  string first_name = 2;
+  string last_name = 3;
+  string email = 4;
+  string specialization = 5;
+  string phone_number = 6;
+  string qualification = 7;
+  int32 experience = 8;
+}
+
+message DoctorListResponse {
+  repeated DoctorResponse doctors = 1;
+}

@@ -1,4 +1,4 @@
-package com.pm.doctorservice.service.impl;
+package com.pm.doctorservice.service;
 
 import com.pm.doctorservice.dto.DoctorRequestDTO;
 import com.pm.doctorservice.dto.DoctorResponseDTO;

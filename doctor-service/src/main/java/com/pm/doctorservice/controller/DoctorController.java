@@ -5,6 +5,7 @@ import com.pm.doctorservice.dto.DoctorResponseDTO;
 import com.pm.doctorservice.service.DoctorService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -60,4 +61,15 @@ public class DoctorController {
 
         return doctorService.getDoctorsBySpecialization(specialization);
     }
+
+    @GetMapping("/recommend")
+    public ResponseEntity<List<DoctorResponseDTO>> recommendDoctors(
+            @RequestParam String specialization) {
+
+        return ResponseEntity.ok(
+                doctorService.getDoctorsBySpecialization(specialization)
+        );
+    }
+
+
 }
