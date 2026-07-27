@@ -1,13 +1,14 @@
 package com.pm.billingservice.service;
 
 import billing.GenerateBillRequest;
+import com.pm.billingservice.dto.CreateBillRequest;
 import com.pm.billingservice.model.Bill;
 
 import java.util.UUID;
 
 public interface BillingService {
 
-    Bill generateBill(GenerateBillRequest request);
+    Bill generateBill(CreateBillRequest request);
 
     Bill getBill(UUID billId);
 

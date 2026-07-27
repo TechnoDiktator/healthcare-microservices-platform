@@ -2,6 +2,7 @@ package com.pm.patientservice.controller;
 
 
 import com.pm.patientservice.dto.CreatePatientValidationGroup;
+import com.pm.patientservice.dto.DoctorResponseDTO;
 import com.pm.patientservice.dto.PatientRequestDTO;
 import com.pm.patientservice.dto.PatientResponseDTO;
 import com.pm.patientservice.repository.PatientRepository;
@@ -62,6 +63,16 @@ public class PatientController {
         patientService.deletePatient(id);
         return ResponseEntity.ok().body("Patient successfully deleted");
 
+    }
+
+    @GetMapping("/{id}/recommended-doctors")
+    public ResponseEntity<List<DoctorResponseDTO>> getRecommendedDoctors(
+            @PathVariable UUID id,
+            @RequestParam String disease) {
+
+        return ResponseEntity.ok(
+                patientService.getRecommendedDoctors(id, disease)
+        );
     }
 
 

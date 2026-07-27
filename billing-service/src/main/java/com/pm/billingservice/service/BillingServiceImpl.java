@@ -1,13 +1,11 @@
 package com.pm.billingservice.service;
 
-import billing.GenerateBillRequest;
-import billing.Medicine;
+import com.pm.billingservice.dto.CreateBillRequest;
+import com.pm.billingservice.dto.MedicineDTO;
+import com.pm.billingservice.exception.BillNotFoundException;
 import com.pm.billingservice.model.Bill;
 import com.pm.billingservice.model.PaymentStatusEnum;
-
-
 import com.pm.billingservice.repository.BillRepository;
-import com.pm.billingservice.service.BillingService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,11 +21,11 @@ public class BillingServiceImpl implements BillingService {
     }
 
     @Override
-    public Bill generateBill(GenerateBillRequest request) {
+    public Bill generateBill(CreateBillRequest request) {
 
         double medicineCost = 0;
 
-        for (Medicine medicine : request.getMedicinesList()) {
+        for (MedicineDTO medicine : request.getMedicines()) {
             medicineCost +=
                     medicine.getQuantity() *
                             medicine.getUnitPrice();
@@ -58,7 +56,8 @@ public class BillingServiceImpl implements BillingService {
 
         return billRepository.findById(billId)
                 .orElseThrow(() ->
-                        new RuntimeException("Bill not found"));
+                        new BillNotFoundException(
+                                "Bill not found with id: " + billId));
     }
 
     @Override
@@ -66,7 +65,8 @@ public class BillingServiceImpl implements BillingService {
 
         Bill bill = billRepository.findById(billId)
                 .orElseThrow(() ->
-                        new RuntimeException("Bill not found"));
+                        new BillNotFoundException(
+                                "Bill not found with id: " + billId));
 
         bill.setPaymentStatus(PaymentStatusEnum.PAID);
 

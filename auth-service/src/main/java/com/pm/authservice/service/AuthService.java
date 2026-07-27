@@ -2,6 +2,7 @@ package com.pm.authservice.service;
 
 import com.pm.authservice.dto.LoginRequestDTO;
 import com.pm.authservice.dto.RegisterRequestDTO;
+import com.pm.authservice.model.Role;
 import com.pm.authservice.model.User;
 import com.pm.authservice.utility.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -68,6 +69,10 @@ public class AuthService {
             throw new RuntimeException("Email already exists");
         }
 
+        if (request.getRole() == Role.ADMIN) {
+            throw new RuntimeException("Cannot register as ADMIN");
+        }
+
         User user = new User();
 
         user.setFirstName(request.getFirstName());
@@ -78,7 +83,19 @@ public class AuthService {
 
         userService.save(user);
     }
+    public Optional<User> getAuthenticatedUser(String token) {
 
+        try {
+            jwtUtil.validateToken(token);
+
+            String email = jwtUtil.extractEmail(token);
+
+            return userService.findByEmail(email);
+
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
 
 
 

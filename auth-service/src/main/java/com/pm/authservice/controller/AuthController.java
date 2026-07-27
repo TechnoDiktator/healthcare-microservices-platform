@@ -1,5 +1,6 @@
 package com.pm.authservice.controller;
 
+import com.pm.authservice.dto.AuthenticatedUserResponseDTO;
 import com.pm.authservice.dto.LoginRequestDTO;
 import com.pm.authservice.dto.LoginResponseDTO;
 import com.pm.authservice.dto.RegisterRequestDTO;
@@ -40,17 +41,23 @@ public class AuthController {
 
     @Operation(summary = "Validate Token")
     @GetMapping("/validate")
-    public ResponseEntity<Void> validateToken(@RequestHeader("Authorization") String authHeader){
+    public ResponseEntity<AuthenticatedUserResponseDTO> validateToken(
+            @RequestHeader("Authorization") String authHeader) {
 
-        // Authorization : Bearer <token>
-        if(authHeader == null){
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        return authService.validateToken(authHeader.substring(7))
-                ?ResponseEntity.ok().build():ResponseEntity.status(HttpStatus.UNAUTHORIZED).build() ;
-
-
+        return authService
+                .getAuthenticatedUser(authHeader.substring(7))
+                .map(user -> ResponseEntity.ok(
+                        new AuthenticatedUserResponseDTO(
+                                user.getId(),
+                                user.getEmail(),
+                                user.getRole().name()
+                        )
+                ))
+                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
 
     @PostMapping("/register")

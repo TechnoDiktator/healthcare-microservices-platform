@@ -41,6 +41,22 @@ spring:
             - RewritePath=/api-docs/auth, /v3/api-docs
 
 
+        - id: api-docs-doctor-route
+          uri: http://doctor-service:8080
+          predicates:
+            - Path=/api-docs/doctors
+          filters:
+            - RewritePath=/api-docs/doctors, /v3/api-docs
+
+
+        - id: doctor-service-route
+          uri: http://doctor-service:8080
+          predicates:
+            - Path=/api/doctors/**
+          filters:
+            - StripPrefix=1
+            - JwtValidation
+
 
 
 

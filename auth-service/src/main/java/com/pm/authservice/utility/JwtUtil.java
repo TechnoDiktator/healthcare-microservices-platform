@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
-
+import io.jsonwebtoken.Claims;
 
 @Component
 public class JwtUtil {
@@ -55,7 +55,21 @@ public class JwtUtil {
             }
 
         }
+        private Claims getClaims(String token) {
+            return Jwts.parser()
+                    .verifyWith((SecretKey) secretKey)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        }
 
+        public String extractEmail(String token) {
+            return getClaims(token).getSubject();
+        }
+
+        public String extractRole(String token) {
+            return getClaims(token).get("role", String.class);
+        }
 
 
 

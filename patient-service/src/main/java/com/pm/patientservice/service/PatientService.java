@@ -1,12 +1,15 @@
 package com.pm.patientservice.service;
 
 
+import com.pm.patientservice.dto.DoctorResponseDTO;
 import com.pm.patientservice.dto.PatientRequestDTO;
 import com.pm.patientservice.dto.PatientResponseDTO;
 import com.pm.patientservice.exception.EmailAlreadyExistsException;
 import com.pm.patientservice.exception.PatientNotFoundException;
 import com.pm.patientservice.grpc.BillingServiceGrpcClient;
+import com.pm.patientservice.grpc.DoctorServiceGrpcClient;
 import com.pm.patientservice.kafka.KafkaProducer;
+import com.pm.patientservice.mapper.DiseaseMapper;
 import com.pm.patientservice.mapper.PatientMapper;
 import com.pm.patientservice.model.Patient;
 import com.pm.patientservice.repository.PatientRepository;
@@ -21,13 +24,26 @@ public class PatientService {
 
     private final KafkaProducer kafkaProducer;
     private PatientRepository patientRepository;
-    private final BillingServiceGrpcClient billingServiceGrpcClient;
+//    private final BillingServiceGrpcClient billingServiceGrpcClient;
 
-    public PatientService(PatientRepository patientRepository , BillingServiceGrpcClient billingServiceGrpcClient, KafkaProducer kafkaProducer){
-        this.patientRepository = patientRepository;
-        this.billingServiceGrpcClient = billingServiceGrpcClient;
-        this.kafkaProducer = kafkaProducer;
-    }
+//    private final DoctorServiceGrpcClient doctorClient;
+
+//    private final DiseaseMapper diseaseMapper;
+
+
+//    public PatientService(
+//            PatientRepository patientRepository,
+//            BillingServiceGrpcClient billingServiceGrpcClient,
+//            KafkaProducer kafkaProducer,
+//            DoctorServiceGrpcClient doctorClient,
+//            DiseaseMapper diseaseMapper) {
+//
+//        this.patientRepository = patientRepository;
+//        this.billingServiceGrpcClient = billingServiceGrpcClient;
+//        this.kafkaProducer = kafkaProducer;
+//        this.doctorClient = doctorClient;
+//        this.diseaseMapper = diseaseMapper;
+//    }
 
     public List<PatientResponseDTO> getPatients(){
 
@@ -77,6 +93,23 @@ public class PatientService {
     public  void deletePatient(UUID id){
         patientRepository.deleteById(id);
     }
+
+    public List<DoctorResponseDTO> getRecommendedDoctors(
+            UUID patientId,
+            String disease) {
+
+        patientRepository.findById(patientId)
+                .orElseThrow(() ->
+                        new PatientNotFoundException(
+                                "Patient not found with id: " + patientId));
+
+        String specialization =
+                diseaseMapper.getSpecialization(disease);
+
+        return doctorClient.getDoctorsBySpecialization(
+                specialization);
+    }
+
 
 
 //    public PatientResponseDTO
