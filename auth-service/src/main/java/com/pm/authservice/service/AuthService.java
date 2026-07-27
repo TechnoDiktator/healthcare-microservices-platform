@@ -1,6 +1,7 @@
 package com.pm.authservice.service;
 
 import com.pm.authservice.dto.LoginRequestDTO;
+import com.pm.authservice.dto.RegisterRequestDTO;
 import com.pm.authservice.model.User;
 import com.pm.authservice.utility.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -60,6 +61,24 @@ public class AuthService {
         }
         return true;
     }
+
+    public void register(RegisterRequestDTO request) {
+
+        if (userService.findByEmail(request.getEmail()).isPresent()) {
+            throw new RuntimeException("Email already exists");
+        }
+
+        User user = new User();
+
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(request.getRole());
+
+        userService.save(user);
+    }
+
 
 
 

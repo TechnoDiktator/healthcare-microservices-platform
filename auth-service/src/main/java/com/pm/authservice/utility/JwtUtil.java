@@ -1,5 +1,6 @@
 package com.pm.authservice.utility;
 
+import com.pm.authservice.model.Role;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -27,18 +28,15 @@ public class JwtUtil {
 
         }
 
-
-        public String generateToken(String email , String role){
+        //this is going to form the jwt token
+        public String generateToken(String email, Role role) {
             return Jwts.builder()
                     .subject(email)
-                    .claim("role" , role)
+                    .claim("role", role.name())
                     .issuedAt(new Date())
-                    .expiration(new Date(System.currentTimeMillis() + 1000*60*60*24))
+                    .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
                     .signWith(secretKey)
-                    .compact();  //24 hrs valid                 ... the compact method is going to form teh jwt token
-
-
-
+                    .compact();
         }
 
         public void validateToken(String token){

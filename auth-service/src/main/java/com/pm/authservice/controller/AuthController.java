@@ -2,6 +2,7 @@ package com.pm.authservice.controller;
 
 import com.pm.authservice.dto.LoginRequestDTO;
 import com.pm.authservice.dto.LoginResponseDTO;
+import com.pm.authservice.dto.RegisterRequestDTO;
 import com.pm.authservice.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.HttpStatus;
@@ -52,6 +53,11 @@ public class AuthController {
 
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<Void> register( @RequestBody RegisterRequestDTO request) {
+        authService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 
 
 

@@ -13,11 +13,32 @@ public class User {
     @Column(unique = true , nullable = false)
     private String email;
 
+
+    private String firstName;
+
+    private String lastName;
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
     @Column(nullable = false)
     private String password;
 
     @Column(nullable = false)
-    private String role;
+    private Role role;
 
     public UUID getId() {
         return id;
@@ -43,11 +64,11 @@ public class User {
         this.password = password;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 }
