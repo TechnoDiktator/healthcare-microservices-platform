@@ -1,6 +1,7 @@
 package com.pm.doctorservice.grpc;
 
 import com.pm.doctorservice.dto.DoctorResponseDTO;
+import com.pm.doctorservice.enums.Specialization;
 import com.pm.doctorservice.service.DoctorService;
 import doctor.DoctorListResponse;
 import doctor.DoctorResponse;
@@ -25,9 +26,11 @@ public class DoctorGrpcService extends DoctorServicesGrpc.DoctorServicesImplBase
             DoctorSpecializationRequest request,
             StreamObserver<DoctorListResponse> responseObserver) {
 
+        Specialization specialization =
+                Specialization.valueOf(request.getSpecialization());
+
         List<DoctorResponseDTO> doctors =
-                doctorService.getDoctorsBySpecialization(
-                        request.getSpecialization());
+                doctorService.getDoctorsBySpecialization(specialization);
 
         List<DoctorResponse> protoDoctors = doctors.stream()
                 .map(this::toProtoDoctor)

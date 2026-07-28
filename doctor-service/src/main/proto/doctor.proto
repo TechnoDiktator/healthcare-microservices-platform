@@ -11,8 +11,27 @@ service DoctorServices {
 
 }
 
+enum Specialization {
+  GENERAL_PHYSICIAN = 0;
+  CARDIOLOGIST = 1;
+  NEUROLOGIST = 2;
+  ORTHOPEDIC = 3;
+  DERMATOLOGIST = 4;
+  PEDIATRICIAN = 5;
+  GYNECOLOGIST = 6;
+  OPHTHALMOLOGIST = 7;
+  ENT_SPECIALIST = 8;
+  PSYCHIATRIST = 9;
+  UROLOGIST = 10;
+  ONCOLOGIST = 11;
+  ENDOCRINOLOGIST = 12;
+  PULMONOLOGIST = 13;
+  GASTROENTEROLOGIST = 14;
+  NEPHROLOGIST = 15;
+}
+
 message DoctorSpecializationRequest {
-  string specialization = 1;
+  Specialization specialization = 1;
 }
 
 message DoctorResponse {

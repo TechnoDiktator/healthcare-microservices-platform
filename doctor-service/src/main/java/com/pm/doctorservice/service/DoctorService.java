@@ -2,6 +2,7 @@ package com.pm.doctorservice.service;
 
 import com.pm.doctorservice.dto.DoctorRequestDTO;
 import com.pm.doctorservice.dto.DoctorResponseDTO;
+import com.pm.doctorservice.enums.Specialization;
 
 import java.util.List;
 
@@ -17,5 +18,5 @@ public interface DoctorService {
 
     void deleteDoctor(String id);
 
-    List<DoctorResponseDTO> getDoctorsBySpecialization(String specialization);
+    List<DoctorResponseDTO> getDoctorsBySpecialization(Specialization specialization);
 }

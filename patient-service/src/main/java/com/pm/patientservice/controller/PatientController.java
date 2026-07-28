@@ -9,9 +9,9 @@ import com.pm.patientservice.repository.PatientRepository;
 import com.pm.patientservice.service.PatientService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import jakarta.validation.groups.Default;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +34,7 @@ public class PatientController {
 
     @GetMapping
     @Operation(summary = "Get Patients" )
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'DOCTOR')")
     public ResponseEntity<List<PatientResponseDTO>> getPatients() {
         List<PatientResponseDTO> patients = patientService.getPatients();
         return ResponseEntity.ok().body(patients);
@@ -42,6 +43,7 @@ public class PatientController {
 
     @PostMapping
     @Operation(summary = "Create a new Patient")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'DOCTOR')")
     public ResponseEntity<PatientResponseDTO> createPatient(@Validated({Default.class , CreatePatientValidationGroup.class}) @RequestBody PatientRequestDTO patientRequestDTO) {
         PatientResponseDTO patientResponseDTO = patientService.createPatient(patientRequestDTO);
         return ResponseEntity.ok().body(patientResponseDTO);
@@ -50,6 +52,7 @@ public class PatientController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a new patient")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'DOCTOR')")
     public ResponseEntity<PatientResponseDTO> updatePatient(@PathVariable UUID id , @Validated({Default.class}) @RequestBody PatientRequestDTO patientRequestDTO){
         PatientResponseDTO patientResponseDTO = patientService.updatePatient(id , patientRequestDTO);
         return ResponseEntity.ok().body(patientResponseDTO);
@@ -59,6 +62,7 @@ public class PatientController {
 
     @DeleteMapping("/delete/{id}")
     @Operation(summary = "Delete a patient")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'DOCTOR')")
     public ResponseEntity<String> deletePatient(@PathVariable UUID id ){
         patientService.deletePatient(id);
         return ResponseEntity.ok().body("Patient successfully deleted");
@@ -66,6 +70,7 @@ public class PatientController {
     }
 
     @GetMapping("/{id}/recommended-doctors")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'DOCTOR')")
     public ResponseEntity<List<DoctorResponseDTO>> getRecommendedDoctors(
             @PathVariable UUID id,
             @RequestParam String disease) {

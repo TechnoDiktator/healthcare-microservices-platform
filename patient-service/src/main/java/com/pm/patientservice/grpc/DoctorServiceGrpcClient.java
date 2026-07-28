@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
+import com.pm.patientservice.enums.Specialization;
 import java.util.List;
 
 
@@ -44,11 +44,15 @@ public class DoctorServiceGrpcClient {
     }
 
     public List<DoctorResponseDTO> getDoctorsBySpecialization(
-            String specialization) {
+            Specialization specialization){
 
         DoctorSpecializationRequest request =
                 DoctorSpecializationRequest.newBuilder()
-                        .setSpecialization(specialization)
+                        .setSpecialization(
+                                doctor.Specialization.valueOf(
+                                        specialization.name()
+                                )
+                        )
                         .build();
 
         DoctorListResponse response =
@@ -67,7 +71,9 @@ public class DoctorServiceGrpcClient {
                 doctor.getFirstName(),
                 doctor.getLastName(),
                 doctor.getEmail(),
-                doctor.getSpecialization(),
+                Specialization.valueOf(
+                        doctor.getSpecialization().name()
+                ),
                 doctor.getPhoneNumber(),
                 doctor.getQualification(),
                 doctor.getExperience()

@@ -1,6 +1,7 @@
-package com.pm.doctorservice.config;
+package com.pm.patientservice.config;
 
-import com.pm.doctorservice.security.GatewayAuthenticationFilter;
+
+import com.pm.patientservice.security.GatewayAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -16,7 +17,7 @@ public class SecurityConfig {
 
     private final GatewayAuthenticationFilter gatewayAuthenticationFilter;
 
-    public SecurityConfig(GatewayAuthenticationFilter gatewayAuthenticationFilter) {
+    public SecurityConfig(com.pm.patientservice.security.GatewayAuthenticationFilter gatewayAuthenticationFilter) {
         this.gatewayAuthenticationFilter = gatewayAuthenticationFilter;
     }
 

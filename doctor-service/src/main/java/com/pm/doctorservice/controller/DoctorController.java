@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import com.pm.doctorservice.enums.Specialization;
 
 import java.util.List;
 
@@ -56,15 +57,17 @@ public class DoctorController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ADMIN')")
-    public void deleteDoctor(@PathVariable String id) {
+    public ResponseEntity<String> deleteDoctor(@PathVariable String id) {
 
         doctorService.deleteDoctor(id);
+
+        return ResponseEntity.ok("Doctor deleted successfully.");
     }
 
     @GetMapping("/specialization/{specialization}")
     @PreAuthorize("isAuthenticated()")
     public List<DoctorResponseDTO> getDoctorsBySpecialization(
-            @PathVariable String specialization) {
+            @PathVariable Specialization specialization) {
 
         return doctorService.getDoctorsBySpecialization(specialization);
     }
@@ -72,7 +75,7 @@ public class DoctorController {
     @GetMapping("/recommend")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<DoctorResponseDTO>> recommendDoctors(
-            @RequestParam String specialization) {
+            @RequestParam Specialization specialization) {
 
         return ResponseEntity.ok(
                 doctorService.getDoctorsBySpecialization(specialization)

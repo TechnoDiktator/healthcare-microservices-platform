@@ -11,6 +11,8 @@ import com.pm.patientservice.mapper.DiseaseMapper;
 import com.pm.patientservice.mapper.PatientMapper;
 import com.pm.patientservice.model.Patient;
 import com.pm.patientservice.repository.PatientRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -24,7 +26,7 @@ public class PatientService {
     private final KafkaProducer kafkaProducer;
     private final DoctorServiceGrpcClient doctorClient;
     private final DiseaseMapper diseaseMapper;
-
+    private static final Logger log = LoggerFactory.getLogger(PatientService.class);
     public PatientService(
             PatientRepository patientRepository,
             KafkaProducer kafkaProducer,
@@ -118,13 +120,16 @@ public class PatientService {
             UUID patientId,
             String disease) {
 
+        log.info("Fetching recommended doctors for patient {} with disease {}", patientId, disease);
+
         patientRepository.findById(patientId)
                 .orElseThrow(() ->
                         new PatientNotFoundException(
                                 "Patient not found with id: " + patientId));
 
-        String specialization =
-                diseaseMapper.getSpecialization(disease);
+        String specialization = diseaseMapper.getSpecialization(disease);
+
+        log.info("Mapped disease {} to specialization {}", disease, specialization);
 
         return doctorClient.getDoctorsBySpecialization(specialization);
     }

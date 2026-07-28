@@ -2,6 +2,7 @@ package com.pm.doctorservice.service;
 
 import com.pm.doctorservice.dto.DoctorRequestDTO;
 import com.pm.doctorservice.dto.DoctorResponseDTO;
+import com.pm.doctorservice.enums.Specialization;
 import com.pm.doctorservice.exception.DoctorNotFoundException;
 import com.pm.doctorservice.exception.EmailAlreadyExistsException;
 import com.pm.doctorservice.mapper.DoctorMapper;
@@ -96,11 +97,15 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
-    public List<DoctorResponseDTO> getDoctorsBySpecialization(String specialization) {
+    public List<DoctorResponseDTO> getDoctorsBySpecialization(
+            Specialization specialization) {
 
         return doctorRepository.findBySpecialization(specialization)
                 .stream()
                 .map(DoctorMapper::toDoctorResponseDTO)
                 .toList();
     }
+
+
+
 }

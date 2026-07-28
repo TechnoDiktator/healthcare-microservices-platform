@@ -1,5 +1,6 @@
 package com.pm.doctorservice.repository;
 
+import com.pm.doctorservice.enums.Specialization;
 import com.pm.doctorservice.model.Doctor;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
@@ -12,5 +13,5 @@ public interface DoctorRepository extends MongoRepository<Doctor, String> {
 
     Optional<Doctor> findByEmail(String email);
 
-    List<Doctor> findBySpecialization(String specialization);
+    List<Doctor> findBySpecialization(Specialization specialization);
 }
