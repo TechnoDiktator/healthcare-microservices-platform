@@ -235,7 +235,118 @@ Example entry points:
 
 ---
 
-## 🎯 What this project demonstrates
+## � REST API Reference
+
+The gateway exposes the public entry points, and the individual services expose their own REST endpoints underneath.
+
+### Auth Service
+
+Base path: /auth (through gateway) or / on the service itself
+
+| Method | Endpoint | Description | Auth |
+| --- | --- | --- | --- |
+| POST | /auth/login | Authenticate a user and return a token | Public |
+| GET | /auth/validate | Validate a bearer token | Required |
+| POST | /auth/register | Register a new user account | Public |
+
+### Internal Auth Management
+
+| Method | Endpoint | Description | Auth |
+| --- | --- | --- | --- |
+| POST | /internal/users | Create an internal user | Internal |
+| PUT | /internal/users/{id} | Update an internal user | Internal |
+| DELETE | /internal/users/{id} | Delete an internal user | Internal |
+
+### Patient Service
+
+Base path: /api/patients (through gateway) or /patients on the service
+
+| Method | Endpoint | Description | Auth |
+| --- | --- | --- | --- |
+| GET | /api/patients | Get all patients | ADMIN, STAFF, DOCTOR |
+| POST | /api/patients | Create a patient | ADMIN, STAFF, DOCTOR |
+| PUT | /api/patients/{id} | Update a patient | ADMIN, STAFF, DOCTOR |
+| DELETE | /api/patients/delete/{id} | Delete a patient | ADMIN, STAFF, DOCTOR |
+| GET | /api/patients/{id}/recommended-doctors | Get doctors recommended for a patient condition | ADMIN, STAFF, DOCTOR |
+| GET | /api/patients/random | Fetch a random patient | ADMIN, STAFF, DOCTOR |
+| GET | /api/patients/{patientId}/bills/{billId} | Retrieve a patient bill | ADMIN, PATIENT |
+| PUT | /api/patients/{patientId}/bills/{billId}/pay | Pay a patient bill | ADMIN, PATIENT |
+
+### Doctor Service
+
+Base path: /api/doctors (through gateway) or /doctors on the service
+
+| Method | Endpoint | Description | Auth |
+| --- | --- | --- | --- |
+| POST | /api/doctors | Create a doctor | ADMIN |
+| GET | /api/doctors/{id} | Get a doctor by ID | Authenticated |
+| GET | /api/doctors | Get all doctors | Authenticated |
+| PUT | /api/doctors/{id} | Update a doctor | ADMIN |
+| DELETE | /api/doctors/{id} | Delete a doctor | ADMIN |
+| GET | /api/doctors/specialization/{specialization} | Get doctors by specialization | Authenticated |
+| GET | /api/doctors/recommend | Recommend doctors by specialization | Authenticated |
+| POST | /api/doctors/{doctorId}/prescriptions | Create a prescription for a doctor | Authenticated |
+| GET | /api/doctors/prescriptions/{prescriptionId} | Get a prescription by ID | Authenticated |
+| GET | /api/doctors/{doctorId}/prescriptions | Get prescriptions for a doctor | Authenticated |
+| GET | /api/doctors/patients/{patientId}/prescriptions | Get prescriptions for a patient | Authenticated |
+| DELETE | /api/doctors/prescriptions/{prescriptionId} | Delete a prescription | Authenticated |
+
+---
+
+## 🔧 gRPC API Reference
+
+The services also communicate internally using gRPC contracts defined in the proto files.
+
+### Billing Service gRPC
+
+Service name: BillingService
+
+| RPC | Request | Response | Purpose |
+| --- | --- | --- | --- |
+| GenerateBill | GenerateBillRequest | GenerateBillResponse | Create a billing record from prescription data |
+| GetBill | GetBillRequest | BillResponse | Retrieve a bill by ID |
+| PayBill | PayBillRequest | PaymentResponse | Mark a bill as paid |
+
+#### Message shapes
+
+- GenerateBillRequest: prescriptionId, patientId, doctorId, consultationFee, medicines[]
+- GenerateBillResponse: billId, totalAmount, paymentStatus
+- GetBillRequest: billId
+- BillResponse: billId, prescriptionId, patientId, doctorId, consultationFee, medicineCost, totalAmount, paymentStatus
+- PayBillRequest: billId
+- PaymentResponse: billId, paymentStatus
+
+### Doctor Service gRPC
+
+Service name: DoctorServices
+
+| RPC | Request | Response | Purpose |
+| --- | --- | --- | --- |
+| GetDoctorsBySpecialization | DoctorSpecializationRequest | DoctorListResponse | Return doctors matching a specialization |
+
+#### Message shapes
+
+- DoctorSpecializationRequest: specialization
+- DoctorListResponse: doctors[]
+- DoctorResponse: id, first_name, last_name, email, specialization, phone_number, qualification, experience
+
+### Patient Service gRPC
+
+Service name: PatientService
+
+| RPC | Request | Response | Purpose |
+| --- | --- | --- | --- |
+| GetPatientById | GetPatientRequest | PatientResponse | Fetch a patient by ID |
+| GetRandomPatient | Empty | PatientResponse | Return a random patient record |
+
+#### Message shapes
+
+- GetPatientRequest: patient_id
+- PatientResponse: id, name, email, address, date_of_birth
+
+---
+
+## �🎯 What this project demonstrates
 
 This repository is a good example of:
 
