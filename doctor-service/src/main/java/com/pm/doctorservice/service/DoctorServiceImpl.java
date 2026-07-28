@@ -1,7 +1,10 @@
 package com.pm.doctorservice.service;
 
+import com.pm.doctorservice.authclient.AuthClient;
 import com.pm.doctorservice.dto.DoctorRequestDTO;
 import com.pm.doctorservice.dto.DoctorResponseDTO;
+import com.pm.doctorservice.dto.InternalUserRequestDTO;
+import com.pm.doctorservice.enums.Role;
 import com.pm.doctorservice.enums.Specialization;
 import com.pm.doctorservice.exception.DoctorNotFoundException;
 import com.pm.doctorservice.exception.EmailAlreadyExistsException;
@@ -12,15 +15,23 @@ import com.pm.doctorservice.service.DoctorService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class DoctorServiceImpl implements DoctorService {
 
     private final DoctorRepository doctorRepository;
+    private final AuthClient authClient;
 
-    public DoctorServiceImpl(DoctorRepository doctorRepository) {
+    public DoctorServiceImpl(DoctorRepository doctorRepository,
+                             AuthClient authClient) {
         this.doctorRepository = doctorRepository;
+        this.authClient = authClient;
     }
+
+
+
+
 
     @Override
     public DoctorResponseDTO createDoctor(DoctorRequestDTO requestDTO) {
@@ -31,12 +42,39 @@ public class DoctorServiceImpl implements DoctorService {
                             "Doctor with email " + requestDTO.getEmail() + " already exists");
                 });
 
+
+
         Doctor doctor = DoctorMapper.toDoctor(requestDTO);
+
+        UUID doctorId = UUID.randomUUID();
+        doctor.setId(doctorId.toString());
 
         Doctor savedDoctor = doctorRepository.save(doctor);
 
+        InternalUserRequestDTO authRequest = new InternalUserRequestDTO();
+
+        authRequest.setId(doctorId);
+        authRequest.setEmail(savedDoctor.getEmail());
+        authRequest.setPassword(requestDTO.getPassword());
+        authRequest.setRole(Role.DOCTOR);
+
+        try {
+
+            authClient.createInternalUser(authRequest);
+
+        } catch (Exception ex) {
+
+            doctorRepository.delete(savedDoctor);
+
+            throw ex;
+        }
+
         return DoctorMapper.toDoctorResponseDTO(savedDoctor);
     }
+
+
+
+
 
     @Override
     public DoctorResponseDTO getDoctorById(String id) {

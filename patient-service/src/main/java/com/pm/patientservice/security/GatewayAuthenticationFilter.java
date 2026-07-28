@@ -1,5 +1,6 @@
 package com.pm.patientservice.security;
 
+import com.pm.patientservice.enums.Role;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,17 +33,20 @@ public class GatewayAuthenticationFilter extends OncePerRequestFilter {
             response.getWriter().write("Unauthorized");
             return;
         }
+        UserContext userContext = new UserContext(
+                userId,
+                email,
+                Role.valueOf(role)
+        );
 
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(
-                        email,
+                        userContext,
                         null,
                         Collections.singletonList(
                                 new SimpleGrantedAuthority("ROLE_" + role)
                         )
                 );
-
-        authentication.setDetails(userId);
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 

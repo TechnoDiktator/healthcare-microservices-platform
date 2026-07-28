@@ -1,5 +1,6 @@
 package com.pm.authservice.service;
 
+import com.pm.authservice.dto.InternalUserRequestDTO;
 import com.pm.authservice.dto.LoginRequestDTO;
 import com.pm.authservice.dto.RegisterRequestDTO;
 import com.pm.authservice.exception.EmailAlreadyExistsException;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -65,12 +67,16 @@ public class AuthService {
             throw new EmailAlreadyExistsException("Email already exists");
         }
 
-        if (request.getRole() == Role.ADMIN) {
-            throw new InvalidRoleException("Cannot register as ADMIN");
+        if (request.getRole() == Role.ADMIN ||
+                request.getRole() == Role.DOCTOR) {
+
+            throw new InvalidRoleException(
+                    "This role cannot be registered directly.");
         }
 
         User user = new User();
 
+        user.setId(UUID.randomUUID());
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setEmail(request.getEmail());
@@ -79,6 +85,26 @@ public class AuthService {
 
         return userService.save(user);
     }
+
+
+    public User createInternalUser(InternalUserRequestDTO request) {
+
+        if (userService.findByEmail(request.getEmail()).isPresent()) {
+            throw new EmailAlreadyExistsException("Email already exists");
+        }
+
+        User user = new User();
+
+        // UUID comes from Doctor/Patient Service
+        user.setId(request.getId());
+
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(request.getRole());
+
+        return userService.save(user);
+    }
+
 
     public Optional<User> getAuthenticatedUser(String token) {
 
@@ -93,4 +119,35 @@ public class AuthService {
             return Optional.empty();
         }
     }
+
+    public User updateInternalUser(UUID id,
+                                   InternalUserRequestDTO request) {
+
+        User user = userService.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+        user.setEmail(request.getEmail());
+
+        if (request.getPassword() != null &&
+                !request.getPassword().isBlank()) {
+
+            user.setPassword(
+                    passwordEncoder.encode(request.getPassword()));
+        }
+
+        user.setRole(request.getRole());
+
+        return userService.save(user);
+    }
+    public void deleteInternalUser(UUID id) {
+
+        User user = userService.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+        userService.delete(user);
+    }
+
+
 }

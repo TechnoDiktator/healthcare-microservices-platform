@@ -1,10 +1,7 @@
 package com.pm.doctorservice.dto;
 
 import com.pm.doctorservice.enums.Specialization;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 
 public class DoctorRequestDTO {
 
@@ -30,6 +27,18 @@ public class DoctorRequestDTO {
     @NotNull(message = "Experience is required")
     @Min(value = 0, message = "Experience cannot be negative")
     private Integer experience;
+    @NotBlank(message = "Password is required")
+    @Size(min = 8, message = "Password must be at least 8 characters")
+    private String password;
+
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
 
     public String getFirstName() {

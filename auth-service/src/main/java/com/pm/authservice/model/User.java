@@ -7,7 +7,7 @@ import java.util.UUID;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(nullable = false, updatable = false)
     private UUID id;
 
     @Column(unique = true , nullable = false)
