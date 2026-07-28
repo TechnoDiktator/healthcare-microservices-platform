@@ -1,0 +1,44 @@
+flowchart TD
+    Client[Client / Postman / Web App]
+    Gateway[API Gateway<br/>Spring Cloud Gateway]
+    Auth[Auth Service<br/>JWT + Auth]
+    Patient[Patient Service<br/>Patient CRUD + workflows]
+    Doctor[Doctor Service<br/>Doctor CRUD + workflows]
+    Billing[Billing Service<br/>Billing records + invoices]
+    Analytics[Analytics Service<br/>Event-driven reporting]
+
+    DBAuth[(PostgreSQL<br/>auth_db)]
+    DBPatient[(PostgreSQL<br/>patient_db)]
+    DBDoc[(MongoDB<br/>doctor_db)]
+    DBBilling[(PostgreSQL<br/>billing_db)]
+    DBAnalytics[(MongoDB<br/>analytics data)]
+
+    Kafka[Kafka Broker<br/>Event Streaming]
+
+    Client --> Gateway
+    Gateway --> Auth
+    Gateway --> Patient
+    Gateway --> Doctor
+
+    Patient --> Doctor
+    Patient --> Billing
+    Doctor --> Billing
+    Billing --> Kafka
+    Patient --> Kafka
+    Doctor --> Kafka
+
+    Auth --> DBAuth
+    Patient --> DBPatient
+    Doctor --> DBDoc
+    Billing --> DBBilling
+    Analytics --> DBAnalytics
+
+    Kafka --> Analytics
+
+    classDef service fill:#E8F1FF,stroke:#1D4ED8,stroke-width:1.5px,color:#0F172A;
+    classDef data fill:#ECFDF3,stroke:#047857,stroke-width:1.5px,color:#064E3B;
+    classDef event fill:#FEF3C7,stroke:#D97706,stroke-width:1.5px,color:#78350F;
+
+    class Client,Gateway,Auth,Patient,Doctor,Billing,Analytics service;
+    class DBAuth,DBPatient,DBDoc,DBBilling,DBAnalytics data;
+    class Kafka event;

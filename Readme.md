@@ -1,383 +1,253 @@
 # 🏥 Healthcare Microservices Platform
 
-> A production-inspired distributed healthcare backend built with **Spring Boot**, **gRPC**, **Apache Kafka**, **Protocol Buffers**, **PostgreSQL**, **MongoDB**, and **Docker**.
+This repository contains a distributed healthcare backend built with Spring Boot, gRPC, Kafka, PostgreSQL, MongoDB, and Docker. The services are organized around separate business domains and communicate through REST APIs, synchronous gRPC calls, and asynchronous Kafka events.
 
 ---
 
-# 📖 Overview
+## 📖 Overview
 
-Healthcare systems typically consist of multiple independent domains such as patient management, doctor management, billing, prescriptions, and analytics. Rather than implementing these as a single monolithic application, this project demonstrates how they can be designed as independently deployable microservices communicating through synchronous and asynchronous channels.
+The project demonstrates a realistic microservices setup for:
 
-The project emphasizes **distributed systems concepts**, **event-driven architecture**, and **production-oriented backend engineering** instead of simple CRUD operations.
+- authentication and authorization
+- patient management
+- doctor management
+- billing operations
+- analytics and event-driven reporting
 
----
-
-# ✨ Features
-
-* Microservice Architecture
-* RESTful APIs
-* gRPC-based inter-service communication
-* Apache Kafka event streaming
-* Protocol Buffers for serialization
-* Event-driven Analytics Service
-* PostgreSQL & MongoDB (Polyglot Persistence)
-* Dockerized Services
-* Domain-driven service separation
-* Structured exception handling
-* Production-style logging
+The system is designed so each service can evolve independently while still cooperating through clear integration boundaries.
 
 ---
 
-# 🏗️ System Architecture
+## 🏗️ Architecture
 
-```text
-                           Client
-                              │
-                              ▼
-                     REST API Requests
-                              │
-        ┌─────────────────────────────────────┐
-        │                                     │
-        ▼                                     ▼
- Patient Service                      Doctor Service
-        │                                     │
-        └──────────────┐──────────────────────┘
-                       ▼
-               Prescription Service
-                       │
-                gRPC Billing Request
-                       ▼
-                 Billing Service
-                       │
-                Publish Kafka Events
-                       ▼
-                 Apache Kafka Broker
-                       ▼
-               Analytics Service
-                       │
-                 MongoDB Analytics
+The system is organized as a layered microservices architecture with a central gateway, domain services, event streaming, and separate data stores.
+
+### High-level architecture
+
+```mermaid
+flowchart TD
+    Client[Client / Postman / Web App]
+    Gateway[API Gateway<br/>Spring Cloud Gateway]
+    Auth[Auth Service<br/>JWT + Auth]
+    Patient[Patient Service<br/>Patient CRUD + workflows]
+    Doctor[Doctor Service<br/>Doctor CRUD + workflows]
+    Billing[Billing Service<br/>Billing records + invoices]
+    Analytics[Analytics Service<br/>Event-driven reporting]
+
+    DBAuth[(PostgreSQL<br/>auth_db)]
+    DBPatient[(PostgreSQL<br/>patient_db)]
+    DBDoc[(MongoDB<br/>doctor_db)]
+    DBBilling[(PostgreSQL<br/>billing_db)]
+    DBAnalytics[(MongoDB<br/>analytics data)]
+
+    Kafka[Kafka Broker<br/>Event Streaming]
+
+    Client --> Gateway
+    Gateway --> Auth
+    Gateway --> Patient
+    Gateway --> Doctor
+
+    Patient --> Doctor
+    Patient --> Billing
+    Doctor --> Billing
+    Billing --> Kafka
+    Patient --> Kafka
+    Doctor --> Kafka
+
+    Auth --> DBAuth
+    Patient --> DBPatient
+    Doctor --> DBDoc
+    Billing --> DBBilling
+    Analytics --> DBAnalytics
+
+    Kafka --> Analytics
 ```
 
----
+### Service interaction flow
 
-# 🧩 Microservices
+```mermaid
+sequenceDiagram
+    actor User
+    participant Gateway as API Gateway
+    participant Auth as Auth Service
+    participant Patient as Patient Service
+    participant Doctor as Doctor Service
+    participant Billing as Billing Service
+    participant Analytics as Analytics Service
+    participant Kafka as Kafka Broker
 
-## 👤 Patient Service
+    User->>Gateway: REST request
+    Gateway->>Auth: Validate token / auth check
+    Auth-->>Gateway: Auth success
+    Gateway->>Patient: Forward patient request
+    Patient->>Doctor: gRPC doctor validation
+    Patient->>Billing: gRPC billing request
+    Patient->>Kafka: Publish patient event
+    Billing->>Kafka: Publish billing event
+    Doctor->>Kafka: Publish doctor event
+    Kafka-->>Analytics: Consume domain events
+    Analytics-->>Analytics: Update reporting model
+    Patient-->>Gateway: Response
+    Gateway-->>User: Final response
+```
 
-Responsibilities
+### Data and messaging view
 
-* Register patients
-* Update patient information
-* Delete patients
-* Publish patient lifecycle events
+```mermaid
+flowchart LR
+    subgraph DomainServices[Domain Services]
+        P[Patient Service]
+        D[Doctor Service]
+        B[Billing Service]
+    end
 
-Database
+    subgraph Storage[Storage Layer]
+        PG[(PostgreSQL)]
+        MG[(MongoDB)]
+    end
 
-* PostgreSQL
+    subgraph Integration[Integration Layer]
+        K[Kafka]
+        A[Analytics Service]
+    end
 
-Published Events
+    P --> PG
+    B --> PG
+    D --> MG
+    P --> K
+    D --> K
+    B --> K
+    K --> A
+    A --> MG
+```
 
-* PATIENT_CREATED
-* PATIENT_UPDATED
-* PATIENT_DELETED
+### How the services interact
 
----
-
-## 👨‍⚕️ Doctor Service
-
-Responsibilities
-
-* Register doctors
-* Manage doctor profiles
-* Validate specialization
-* Publish doctor events
-
-Database
-
-* MongoDB
-
-Published Events
-
-* DOCTOR_CREATED
-* DOCTOR_UPDATED
-* DOCTOR_DELETED
-
----
-
-## 💳 Billing Service
-
-Responsibilities
-
-* Generate consultation bills
-* Calculate billing information
-* Maintain billing records
-* Publish billing events
-
-Database
-
-* PostgreSQL
-
-Published Events
-
-* BILL_CREATED
-* BILL_UPDATED
-* BILL_DELETED
-
----
-
-## 📋 Prescription Service
-
-Responsibilities
-
-* Validate patients
-* Validate doctors
-* Verify specialization
-* Generate bills through gRPC
-* Create prescriptions
-* Publish prescription events
-
-Database
-
-* MongoDB
-
-Published Events
-
-* PRESCRIPTION_CREATED
-* PRESCRIPTION_DELETED
+- The API Gateway serves as the single entry point for all client requests.
+- The Auth Service handles authentication and identity validation for protected routes.
+- The Patient Service manages patient lifecycle operations and invokes downstream services over gRPC.
+- The Doctor Service manages doctor-related domain operations and participates in cross-service validation flows.
+- The Billing Service handles billing records and publishes domain events after business operations.
+- The Analytics Service consumes Kafka events to maintain reporting and analytics data without direct coupling to the producing services.
 
 ---
 
-## 📊 Analytics Service
+## 🧩 Microservices
 
-Responsibilities
-
-* Consume Kafka events
-* Maintain analytics read models
-* Store denormalized reporting data
-* Serve analytics endpoints
-
-Database
-
-* MongoDB
-
-Consumes
-
-* patient-events
-* doctor-events
-* billing-events
-* prescription-events
+| Service | Primary responsibility | Data store | Communication style |
+| --- | --- | --- | --- |
+| API Gateway | Central entry point for incoming requests | None | REST routing |
+| Auth Service | Authentication, authorization, and token validation | PostgreSQL | REST |
+| Patient Service | Patient CRUD and patient lifecycle workflows | PostgreSQL | REST, gRPC, Kafka |
+| Doctor Service | Doctor management and doctor-related workflows | MongoDB | REST, gRPC, Kafka |
+| Billing Service | Billing generation and billing records | PostgreSQL | REST, gRPC, Kafka |
+| Analytics Service | Consumes events and builds analytics/read models | MongoDB | Kafka |
 
 ---
 
-# 🔄 Communication Patterns
+## 🔄 Communication Patterns
 
-## REST
+### REST
+Used for client-facing APIs and gateway routing.
 
-Used for client-to-service communication.
+### gRPC
+Used for internal service-to-service calls such as:
 
-Examples
+- patient validation
+- doctor validation
+- billing creation
 
-* Create Patient
-* Create Doctor
-* Create Prescription
+### Kafka
+Used for asynchronous event propagation between services.
 
----
-
-## gRPC
-
-Used for synchronous communication between internal services.
-
-Examples
-
-* Validate Patient
-* Validate Doctor
-* Generate Bill
-
-Benefits
-
-* High performance
-* Contract-first APIs
-* Efficient binary serialization
+The Analytics Service listens to business events published by the other services so it can maintain reporting data without tight coupling.
 
 ---
 
-## Apache Kafka
-
-Used for asynchronous communication.
-
-Each service publishes domain events after successful business operations.
-
-Topics
-
-* patient-events
-* doctor-events
-* billing-events
-* prescription-events
-
-The Analytics Service consumes these events to maintain reporting data without tightly coupling itself to the producer services.
-
----
-
-# 📦 Technology Stack
-
-| Category          | Technology          |
-| ----------------- | ------------------- |
-| Language          | Java 21             |
-| Framework         | Spring Boot         |
-| Communication     | REST, gRPC          |
-| Messaging         | Apache Kafka        |
-| Serialization     | Protocol Buffers    |
-| Databases         | PostgreSQL, MongoDB |
-| Build Tool        | Maven               |
-| Containerization  | Docker              |
-| API Documentation | Swagger / OpenAPI   |
-
----
-
-# 📁 Project Structure
+## 🗂️ Project Structure
 
 ```text
-healthcare-microservices-platform
-│
-├── auth-service
-├── patient-service
-├── doctor-service
-├── prescription-service
-├── billing-service
-├── analytics-service
-│
+patient-management/
+├── api-gateway/
+├── auth-service/
+├── patient-service/
+├── doctor-service/
+├── billing-service/
+├── analytics-service/
+├── Integration-tests/
 ├── docker-compose.yml
-│
-└── README.md
+└── Readme.md
 ```
 
 ---
 
-# 🔁 Event Flow
+## 🐳 Infrastructure and Runtime
 
-## Creating a Prescription
+The project uses Docker Compose to start the core infrastructure:
 
-```text
-Client
+- PostgreSQL databases for auth, patient, and billing
+- MongoDB for doctor and analytics data
+- Kafka for event streaming
+- All Spring Boot services as containerized apps
 
-↓
+A typical startup flow is:
 
-Prescription Service
-
-↓
-
-Validate Patient (gRPC)
-
-↓
-
-Validate Doctor (gRPC)
-
-↓
-
-Generate Bill (gRPC)
-
-↓
-
-Save Prescription
-
-↓
-
-Publish PRESCRIPTION_CREATED Event
-
-↓
-
-Apache Kafka
-
-↓
-
-Analytics Service
-
-↓
-
-Update Analytics Database
-```
+1. Start the infrastructure with Docker Compose.
+2. Start the microservices.
+3. Route requests through the API Gateway.
+4. Let the services publish events to Kafka for analytics consumption.
 
 ---
 
-# 🚀 Running the Project
+## 🚀 Running the Project
 
-## Clone Repository
+From the repository root:
 
 ```bash
-git clone https://github.com/<your-username>/healthcare-microservices-platform.git
+docker compose up --build
 ```
 
----
+Then access the services through the gateway and service-specific ports defined in the Docker Compose setup.
 
-## Start Infrastructure
+Example entry points:
 
-```bash
-docker compose up
-```
-
----
-
-## Start Services
-
-Run each Spring Boot service.
-
-* Auth Service
-* Patient Service
-* Doctor Service
-* Billing Service
-* Prescription Service
-* Analytics Service
+- API Gateway: http://localhost:8080
+- Auth Service: http://localhost:8081
+- Patient Service: http://localhost:4000
+- Doctor Service: http://localhost:8082
+- Billing Service: http://localhost:8083
 
 ---
 
-## Access Swagger
+## 🛠️ Technology Stack
 
-Each microservice exposes Swagger/OpenAPI documentation.
-
-Example
-
-```
-http://localhost:<port>/swagger-ui/index.html
-```
-
----
-
-# 📈 Future Enhancements
-
-* Distributed Tracing using OpenTelemetry
-* Jaeger Integration
-* Prometheus Metrics
-* Grafana Dashboards
-* Spring Boot Actuator
-* Correlation IDs
-* Resilience4j (Retry & Circuit Breaker)
-* Kubernetes Deployment
-* GitHub Actions CI/CD
+- Java 21
+- Spring Boot
+- Spring Security
+- Spring Cloud Gateway
+- REST APIs
+- gRPC
+- Apache Kafka
+- PostgreSQL
+- MongoDB
+- Docker / Docker Compose
+- Maven
 
 ---
 
-# 🎯 Learning Objectives
+## 🎯 What this project demonstrates
 
-This project was built to explore modern backend engineering concepts commonly used in distributed production systems, including:
+This repository is a good example of:
 
-* Service decomposition
-* Event-driven architecture
-* Asynchronous messaging
-* High-performance service-to-service communication
-* Polyglot persistence
-* Domain isolation
-* Scalable backend design
-
----
-
-# 🤝 Contributing
-
-Contributions, suggestions, and improvements are welcome.
-
-Feel free to open an issue or submit a pull request.
+- service decomposition
+- inter-service communication
+- event-driven architecture
+- polyglot persistence
+- container-based deployment
+- distributed backend design
 
 ---
 
-# 📄 License
+## 🤝 Notes
 
-This project is intended for educational and portfolio purposes.
+The current implementation uses an API Gateway, authentication service, patient/doctor/billing services, and an analytics service. The repository also contains an Integration-tests module for end-to-end verification.
