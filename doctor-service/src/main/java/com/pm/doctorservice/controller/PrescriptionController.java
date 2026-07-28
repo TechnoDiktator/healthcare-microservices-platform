@@ -60,6 +60,12 @@ public class PrescriptionController {
         System.out.println(user.getUserId());
         System.out.println(user.getRole());
         System.out.println(user.getEmail());
+
+        authorizationService.authorizeViewPrescription(
+                user,
+                prescriptionId);
+
+
         return ResponseEntity.ok(
                 prescriptionService.getPrescriptionById(prescriptionId));
     }
@@ -68,6 +74,11 @@ public class PrescriptionController {
     public ResponseEntity<List<PrescriptionResponseDTO>> getDoctorPrescriptions(
             @PathVariable UUID doctorId) {
         UserContext user = getCurrentUser();
+
+
+        authorizationService.authorizeDoctorHistory(
+                user,
+                doctorId);
 
         System.out.println(user.getUserId());
         System.out.println(user.getRole());
@@ -80,6 +91,11 @@ public class PrescriptionController {
             @PathVariable UUID patientId) {
         UserContext user = getCurrentUser();
 
+        authorizationService.authorizePatientHistory(
+                user,
+                patientId);
+
+
         System.out.println(user.getUserId());
         System.out.println(user.getRole());
         System.out.println(user.getEmail());
@@ -90,6 +106,11 @@ public class PrescriptionController {
     public ResponseEntity<Void> deletePrescription(
             @PathVariable String prescriptionId) {
         UserContext user = getCurrentUser();
+
+
+        authorizationService.authorizeDeletePrescription(
+                user,
+                prescriptionId);
 
         System.out.println(user.getUserId());
         System.out.println(user.getRole());

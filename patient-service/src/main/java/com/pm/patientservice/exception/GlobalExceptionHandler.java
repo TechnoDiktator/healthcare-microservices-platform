@@ -1,4 +1,5 @@
 package com.pm.patientservice.exception;
+import org.springframework.security.access.AccessDeniedException;
 
 
 import com.pm.patientservice.dto.PatientRequestDTO;
@@ -63,7 +64,19 @@ public class GlobalExceptionHandler {
     }
 
 
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, String>> handleAccessDeniedException(
+            AccessDeniedException ex) {
 
+        log.warn("Access denied: {}", ex.getMessage());
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", ex.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(errors);
+    }
 
 
 
