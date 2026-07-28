@@ -1,5 +1,6 @@
 package com.pm.doctorservice.security;
 
+import com.pm.doctorservice.enums.Role;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,16 +34,19 @@ public class GatewayAuthenticationFilter extends OncePerRequestFilter {
         }
         if (userId != null && email != null && role != null) {
 
+            UserContext user =
+                    new UserContext(
+                            userId,
+                            email,
+                            Role.valueOf(role));
+
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
-                            email,
+                            user,
                             null,
                             Collections.singletonList(
                                     new SimpleGrantedAuthority("ROLE_" + role)
-                            )
-                    );
-
-            authentication.setDetails(userId);
+                            ));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }

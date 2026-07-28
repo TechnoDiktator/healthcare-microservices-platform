@@ -28,8 +28,17 @@ public class JwtValidationGatewayFilterFactory extends AbstractGatewayFilterFact
     @Override
     public GatewayFilter apply(Object config){
            return ((exchange, chain) -> {
+
+               //logging the request at the gateway
+               System.out.println("Incoming Request: "
+                       + exchange.getRequest().getMethod()
+                       + " "
+                       + exchange.getRequest().getURI());
                String token  = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+
+
                //exchange variable is a hava object that represents the current request
+
                if(token == null || !token.startsWith("Bearer ")){
                    exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                    return exchange.getResponse().setComplete();
