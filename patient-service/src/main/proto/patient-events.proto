@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package patient.events;
+
+option java_multiple_files = true;
+option java_package = "patient.events";
+option java_outer_classname = "PatientEventProto";
+
+enum PatientEventType {
+  PATIENT_CREATED = 0;
+  PATIENT_UPDATED = 1;
+  PATIENT_DELETED = 2;
+}
+
+message PatientEvent {
+
+  string patientId = 1;
+
+  string name = 2;
+
+  string email = 3;
+
+  string address = 4;
+
+  string dateOfBirth = 5;
+
+  string registeredDate = 6;
+
+  PatientEventType eventType = 7;
+
+  int64 occurredAt = 8;
+}

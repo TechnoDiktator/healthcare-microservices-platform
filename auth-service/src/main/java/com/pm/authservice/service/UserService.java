@@ -39,20 +39,5 @@ public class UserService {
     public void deleteById(UUID id) {
         userRepository.deleteById(id);
     }
-    public void createInternalUser(InternalUserRequestDTO request) {
 
-        if(userRepository.existsByEmail(request.getEmail())) {
-            throw new EmailAlreadyExistsException("Doctor With this email already exists");
-        }
-
-        User user = new User();
-
-        user.setId(request.getId());
-        user.setEmail(request.getEmail());
-        user.setPassword(
-                passwordEncoder.encode(request.getPassword()));
-        user.setRole(request.getRole());
-
-        userRepository.save(user);
-    }
 }

@@ -15,6 +15,7 @@ import com.pm.patientservice.repository.PatientRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import patient.events.PatientEventType;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -63,7 +64,9 @@ public class PatientService implements IPatientService {
                 patientRepository.save(
                         PatientMapper.toPatientModel(patientRequestDTO));
 
-        kafkaProducer.sendEvent(newPatient);
+        kafkaProducer.sendEvent(
+                newPatient,
+                PatientEventType.PATIENT_CREATED);
 
         return PatientMapper.toDTO(newPatient);
     }
@@ -95,17 +98,26 @@ public class PatientService implements IPatientService {
 
         Patient updatedPatient = patientRepository.save(patient);
 
+        kafkaProducer.sendEvent(
+                updatedPatient,
+                PatientEventType.PATIENT_UPDATED);
+
         return PatientMapper.toDTO(updatedPatient);
     }
 
     public void deletePatient(UUID id) {
+        Patient patient = patientRepository.findById(id)
+                .orElseThrow(() ->
+                        new PatientNotFoundException(
+                                "Patient not found with id: " + id));
 
-        if (!patientRepository.existsById(id)) {
-            throw new PatientNotFoundException(
-                    "Patient not found with id: " + id);
-        }
+        kafkaProducer.sendEvent(
+                patient,
+                PatientEventType.PATIENT_DELETED);
 
-        patientRepository.deleteById(id);
+        patientRepository.delete(patient);
+
+
     }
 
     public PatientResponseDTO getPatientById(UUID id) {

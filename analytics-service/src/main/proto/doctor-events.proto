@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package doctor.events;
+
+option java_multiple_files = true;
+option java_package = "doctor.events";
+option java_outer_classname = "DoctorEventProto";
+
+enum DoctorEventType {
+  DOCTOR_CREATED = 0;
+  DOCTOR_UPDATED = 1;
+  DOCTOR_DELETED = 2;
+}
+
+message DoctorEvent {
+
+  string doctorId = 1;
+
+  string firstName = 2;
+
+  string lastName = 3;
+
+  string email = 4;
+
+  string specialization = 5;
+
+  string phoneNumber = 6;
+
+  string qualification = 7;
+
+  int32 experience = 8;
+
+  bool available = 9;
+
+  DoctorEventType eventType = 10;
+
+  int64 occurredAt = 11;
+}

@@ -7,17 +7,22 @@ import com.pm.billingservice.model.Bill;
 import com.pm.billingservice.model.PaymentStatusEnum;
 import com.pm.billingservice.repository.BillRepository;
 import org.springframework.stereotype.Service;
-
+import billing.events.BillingEventType;
+import com.pm.billingservice.kafka.BillingEventPublisher;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
 public class BillingServiceImpl implements BillingService {
-
     private final BillRepository billRepository;
+    private final BillingEventPublisher billingEventPublisher;
 
-    public BillingServiceImpl(BillRepository billRepository) {
+    public BillingServiceImpl(
+            BillRepository billRepository,
+            BillingEventPublisher billingEventPublisher) {
+
         this.billRepository = billRepository;
+        this.billingEventPublisher = billingEventPublisher;
     }
 
     @Override
@@ -47,8 +52,13 @@ public class BillingServiceImpl implements BillingService {
 
         bill.setPaymentStatus(PaymentStatusEnum.PENDING);
         bill.setCreatedAt(LocalDateTime.now());
+        Bill savedBill = billRepository.save(bill);
 
-        return billRepository.save(bill);
+        billingEventPublisher.sendEvent(
+                savedBill,
+                BillingEventType.BILL_GENERATED);
+
+        return savedBill;
     }
 
     @Override
@@ -70,6 +80,14 @@ public class BillingServiceImpl implements BillingService {
 
         bill.setPaymentStatus(PaymentStatusEnum.PAID);
 
-        return billRepository.save(bill);
+        bill.setPaymentStatus(PaymentStatusEnum.PAID);
+
+        Bill updatedBill = billRepository.save(bill);
+
+        billingEventPublisher.sendEvent(
+                updatedBill,
+                BillingEventType.BILL_PAID);
+
+        return updatedBill;
     }
 }

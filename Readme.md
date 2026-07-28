@@ -1,133 +1,383 @@
-https://editor.swagger.io/   ==> this is an editor that is used to document springboot apis that you created in your app 
+# 🏥 Healthcare Microservices Platform
 
+> A production-inspired distributed healthcare backend built with **Spring Boot**, **gRPC**, **Apache Kafka**, **Protocol Buffers**, **PostgreSQL**, **MongoDB**, and **Docker**.
 
+---
 
+# 📖 Overview
 
+Healthcare systems typically consist of multiple independent domains such as patient management, doctor management, billing, prescriptions, and analytics. Rather than implementing these as a single monolithic application, this project demonstrates how they can be designed as independently deployable microservices communicating through synchronous and asynchronous channels.
 
-![img.png](project-images/img.png)
+The project emphasizes **distributed systems concepts**, **event-driven architecture**, and **production-oriented backend engineering** instead of simple CRUD operations.
 
+---
 
+# ✨ Features
 
+* Microservice Architecture
+* RESTful APIs
+* gRPC-based inter-service communication
+* Apache Kafka event streaming
+* Protocol Buffers for serialization
+* Event-driven Analytics Service
+* PostgreSQL & MongoDB (Polyglot Persistence)
+* Dockerized Services
+* Domain-driven service separation
+* Structured exception handling
+* Production-style logging
 
-My recommendation
+---
 
-Yes, add one MongoDB-backed microservice, but give it a real purpose.
+# 🏗️ System Architecture
 
-An Audit Service (or enhanced Analytics Service) that consumes Kafka events 
-and stores flexible event documents in MongoDB is a strong design choice. 
-It lets you explain why you chose a document database instead of PostgreSQL, which is exactly 
-the kind of architectural reasoning senior interviewers look for.
+```text
+                           Client
+                              │
+                              ▼
+                     REST API Requests
+                              │
+        ┌─────────────────────────────────────┐
+        │                                     │
+        ▼                                     ▼
+ Patient Service                      Doctor Service
+        │                                     │
+        └──────────────┐──────────────────────┘
+                       ▼
+               Prescription Service
+                       │
+                gRPC Billing Request
+                       ▼
+                 Billing Service
+                       │
+                Publish Kafka Events
+                       ▼
+                 Apache Kafka Broker
+                       ▼
+               Analytics Service
+                       │
+                 MongoDB Analytics
+```
 
+---
 
-If I had to choose between adding MongoDB and adding observability/testing, I'd do this:
+# 🧩 Microservices
 
-✅ JWT Authentication & Authorization
-✅ API Gateway security
-✅ Flyway migrations
-✅ Micrometer + Prometheus + Grafana
-✅ OpenTelemetry tracing
-✅ Testcontainers integration tests
-✅ Redis caching
-MongoDB Audit/Analytics Service
-Kubernetes deployment
+## 👤 Patient Service
 
-I would not move MongoDB ahead of observability or testing.
+Responsibilities
 
+* Register patients
+* Update patient information
+* Delete patients
+* Publish patient lifecycle events
 
+Database
 
-That's a great question. The gateway doesn't know automatically. You tell it in your filter code.
+* PostgreSQL
 
-In your filter, this line is the key:
+Published Events
 
-webClient.get()
-.uri("/validate")
+* PATIENT_CREATED
+* PATIENT_UPDATED
+* PATIENT_DELETED
 
-You also configured the WebClient with a base URL:
+---
 
-this.webClient = webclientBuilder
-.baseUrl(authServiceUrl)
-.build();
+## 👨‍⚕️ Doctor Service
 
-Suppose:
+Responsibilities
 
-auth.service.url=http://auth-service:4005
+* Register doctors
+* Manage doctor profiles
+* Validate specialization
+* Publish doctor events
 
-Then when you write:
+Database
 
-.uri("/validate")
+* MongoDB
 
-the WebClient combines them:
+Published Events
 
-Base URL: http://auth-service:4005
-URI:      /validate
---------------------------------
-Final URL:
-http://auth-service:4005/validate
+* DOCTOR_CREATED
+* DOCTOR_UPDATED
+* DOCTOR_DELETED
 
-So the gateway is simply making an HTTP request to the endpoint you hardcoded.
+---
 
-Where does /validate come from?
+## 💳 Billing Service
 
-It should exist in your Auth Service.
+Responsibilities
 
-For example:
+* Generate consultation bills
+* Calculate billing information
+* Maintain billing records
+* Publish billing events
 
-@RestController
-@RequestMapping("/auth")
-public class AuthController {
+Database
 
-    @GetMapping("/validate")
-    public ResponseEntity<Void> validateToken(
-            @RequestHeader("Authorization") String token) {
+* PostgreSQL
 
-        // Validate JWT
+Published Events
 
-        return ResponseEntity.ok().build();
-    }
-}
+* BILL_CREATED
+* BILL_UPDATED
+* BILL_DELETED
 
-Then the actual URL becomes:
+---
 
-GET http://auth-service:4005/auth/validate
+## 📋 Prescription Service
 
-In that case, your gateway filter should use:
+Responsibilities
 
-.uri("/auth/validate")
-How do I know what URI to use?
+* Validate patients
+* Validate doctors
+* Verify specialization
+* Generate bills through gRPC
+* Create prescriptions
+* Publish prescription events
 
-It must match whatever endpoint your Auth Service exposes.
+Database
 
-For example:
+* MongoDB
 
-If your auth service has:
+Published Events
 
-@GetMapping("/validate")
+* PRESCRIPTION_CREATED
+* PRESCRIPTION_DELETED
 
-then use:
+---
 
-.uri("/validate")
+## 📊 Analytics Service
 
-If it has:
+Responsibilities
 
-@RequestMapping("/api/auth")
-@GetMapping("/validate")
+* Consume Kafka events
+* Maintain analytics read models
+* Store denormalized reporting data
+* Serve analytics endpoints
 
-then use:
+Database
 
-.uri("/api/auth/validate")
-In general
+* MongoDB
 
-The gateway is just another HTTP client.
+Consumes
 
-Gateway
-|
-| GET http://auth-service:4005/auth/validate
-|
-v
-Auth Service
+* patient-events
+* doctor-events
+* billing-events
+* prescription-events
 
-It's no different from using Postman or curl to call the Auth Service. The only difference is that the gateway does it programmatically before forwarding the client's request.
+---
 
-If you're following a tutorial, check the AuthController in the Auth Service. The endpoint path defined there is exactly what you should pass to .uri(...).
+# 🔄 Communication Patterns
 
+## REST
 
+Used for client-to-service communication.
+
+Examples
+
+* Create Patient
+* Create Doctor
+* Create Prescription
+
+---
+
+## gRPC
+
+Used for synchronous communication between internal services.
+
+Examples
+
+* Validate Patient
+* Validate Doctor
+* Generate Bill
+
+Benefits
+
+* High performance
+* Contract-first APIs
+* Efficient binary serialization
+
+---
+
+## Apache Kafka
+
+Used for asynchronous communication.
+
+Each service publishes domain events after successful business operations.
+
+Topics
+
+* patient-events
+* doctor-events
+* billing-events
+* prescription-events
+
+The Analytics Service consumes these events to maintain reporting data without tightly coupling itself to the producer services.
+
+---
+
+# 📦 Technology Stack
+
+| Category          | Technology          |
+| ----------------- | ------------------- |
+| Language          | Java 21             |
+| Framework         | Spring Boot         |
+| Communication     | REST, gRPC          |
+| Messaging         | Apache Kafka        |
+| Serialization     | Protocol Buffers    |
+| Databases         | PostgreSQL, MongoDB |
+| Build Tool        | Maven               |
+| Containerization  | Docker              |
+| API Documentation | Swagger / OpenAPI   |
+
+---
+
+# 📁 Project Structure
+
+```text
+healthcare-microservices-platform
+│
+├── auth-service
+├── patient-service
+├── doctor-service
+├── prescription-service
+├── billing-service
+├── analytics-service
+│
+├── docker-compose.yml
+│
+└── README.md
+```
+
+---
+
+# 🔁 Event Flow
+
+## Creating a Prescription
+
+```text
+Client
+
+↓
+
+Prescription Service
+
+↓
+
+Validate Patient (gRPC)
+
+↓
+
+Validate Doctor (gRPC)
+
+↓
+
+Generate Bill (gRPC)
+
+↓
+
+Save Prescription
+
+↓
+
+Publish PRESCRIPTION_CREATED Event
+
+↓
+
+Apache Kafka
+
+↓
+
+Analytics Service
+
+↓
+
+Update Analytics Database
+```
+
+---
+
+# 🚀 Running the Project
+
+## Clone Repository
+
+```bash
+git clone https://github.com/<your-username>/healthcare-microservices-platform.git
+```
+
+---
+
+## Start Infrastructure
+
+```bash
+docker compose up
+```
+
+---
+
+## Start Services
+
+Run each Spring Boot service.
+
+* Auth Service
+* Patient Service
+* Doctor Service
+* Billing Service
+* Prescription Service
+* Analytics Service
+
+---
+
+## Access Swagger
+
+Each microservice exposes Swagger/OpenAPI documentation.
+
+Example
+
+```
+http://localhost:<port>/swagger-ui/index.html
+```
+
+---
+
+# 📈 Future Enhancements
+
+* Distributed Tracing using OpenTelemetry
+* Jaeger Integration
+* Prometheus Metrics
+* Grafana Dashboards
+* Spring Boot Actuator
+* Correlation IDs
+* Resilience4j (Retry & Circuit Breaker)
+* Kubernetes Deployment
+* GitHub Actions CI/CD
+
+---
+
+# 🎯 Learning Objectives
+
+This project was built to explore modern backend engineering concepts commonly used in distributed production systems, including:
+
+* Service decomposition
+* Event-driven architecture
+* Asynchronous messaging
+* High-performance service-to-service communication
+* Polyglot persistence
+* Domain isolation
+* Scalable backend design
+
+---
+
+# 🤝 Contributing
+
+Contributions, suggestions, and improvements are welcome.
+
+Feel free to open an issue or submit a pull request.
+
+---
+
+# 📄 License
+
+This project is intended for educational and portfolio purposes.

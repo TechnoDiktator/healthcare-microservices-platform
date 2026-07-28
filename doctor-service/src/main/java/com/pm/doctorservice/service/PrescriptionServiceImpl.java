@@ -1,4 +1,6 @@
 package com.pm.doctorservice.service;
+import com.pm.doctorservice.exception.*;
+import com.pm.doctorservice.kafka.PrescriptionEventPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -6,10 +8,6 @@ import billing.GenerateBillResponse;
 import com.pm.doctorservice.dto.PrescriptionRequestDTO;
 import com.pm.doctorservice.dto.PrescriptionResponseDTO;
 import com.pm.doctorservice.enums.Specialization;
-import com.pm.doctorservice.exception.DoctorNotFoundException;
-import com.pm.doctorservice.exception.InvalidDoctorSpecializationException;
-import com.pm.doctorservice.exception.PatientNotFoundException;
-import com.pm.doctorservice.exception.PrescriptionNotFoundException;
 import com.pm.doctorservice.grpc.BillingServiceGrpcClient;
 import com.pm.doctorservice.grpc.PatientServiceGrpcClient;
 import com.pm.doctorservice.mapper.DiseaseMapper;
@@ -21,6 +19,7 @@ import com.pm.doctorservice.repository.PrescriptionRepository;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.springframework.stereotype.Service;
+import prescription.events.PrescriptionEventType;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,22 +35,22 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     private final PatientServiceGrpcClient patientServiceGrpcClient;
     private final DiseaseMapper diseaseMapper;
 
-
+    private final PrescriptionEventPublisher prescriptionEventPublisher;
     public PrescriptionServiceImpl(
             PrescriptionRepository prescriptionRepository,
             DoctorRepository doctorRepository,
             BillingServiceGrpcClient billingClient,
             PatientServiceGrpcClient patientServiceGrpcClient,
-            DiseaseMapper diseaseMapper
-    ) {
+            DiseaseMapper diseaseMapper,
+            PrescriptionEventPublisher prescriptionEventPublisher) {
 
         this.prescriptionRepository = prescriptionRepository;
         this.doctorRepository = doctorRepository;
         this.billingClient = billingClient;
         this.patientServiceGrpcClient = patientServiceGrpcClient;
         this.diseaseMapper = diseaseMapper;
+        this.prescriptionEventPublisher = prescriptionEventPublisher;
     }
-
     @Override
     public PrescriptionResponseDTO createPrescription(
             String doctorId,
@@ -125,27 +124,44 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
         prescription.setPrescribedAt(LocalDateTime.now());
 
-        prescription = prescriptionRepository.save(prescription);
+
 
         log.info("Prescription saved. Id={}", prescription.getId());
 
         log.info("Calling Billing Service via gRPC...");
 
-        GenerateBillResponse billResponse =
-                billingClient.generateBill(
-                        prescription.getPatientId().toString(),
-                        doctor.getId(),
-                        prescription.getConsultationFee());
+        try {
 
-        log.info("Billing Service responded. BillId={}",
-                billResponse.getBillId());
+            GenerateBillResponse billResponse =
+                    billingClient.generateBill(
+                            prescription.getPatientId().toString(),
+                            doctor.getId(),
+                            prescription.getConsultationFee());
 
-        prescription.setBillId(
-                UUID.fromString(billResponse.getBillId()));
+            log.info("Billing Service responded. BillId={}",
+                    billResponse.getBillId());
+
+            prescription.setBillId(
+                    UUID.fromString(billResponse.getBillId()));
+
+        } catch (StatusRuntimeException e) {
+
+            log.error("Billing Service failed.", e);
+
+            throw new BillingServiceException(
+                    "Unable to generate bill for prescription.",
+                    e);
+        }
+
 
         prescription = prescriptionRepository.save(prescription);
-
+        prescriptionEventPublisher.sendEvent(
+                prescription,
+                PrescriptionEventType.PRESCRIPTION_CREATED);
+        log.info("Published PRESCRIPTION_CREATED event for PrescriptionId={}",
+                prescription.getId());
         log.info("Prescription completed successfully.");
+
 
         return PrescriptionMapper.toDTO(prescription);
     }
@@ -192,11 +208,17 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     @Override
     public void deletePrescription(String prescriptionId) {
 
-        if (!prescriptionRepository.existsById(prescriptionId)) {
-            throw new PrescriptionNotFoundException(
-                    "Prescription not found with id: " + prescriptionId);
-        }
+        Prescription prescription = prescriptionRepository.findById(prescriptionId)
+                .orElseThrow(() ->
+                        new PrescriptionNotFoundException(
+                                "Prescription not found with id: " + prescriptionId));
 
-        prescriptionRepository.deleteById(prescriptionId);
+        prescriptionRepository.delete(prescription);
+
+        prescriptionEventPublisher.sendEvent(
+                prescription,
+                PrescriptionEventType.PRESCRIPTION_DELETED);
+        log.info("Published PRESCRIPTION_DELETED event for PrescriptionId={}",
+                prescription.getId());
     }
 }

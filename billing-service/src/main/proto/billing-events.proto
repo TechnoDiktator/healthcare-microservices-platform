@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package billing.events;
+
+option java_multiple_files = true;
+option java_package = "billing.events";
+option java_outer_classname = "BillingEventProto";
+
+enum BillingEventType {
+  BILL_GENERATED = 0;
+  BILL_PAID = 1;
+}
+
+message BillingEvent {
+
+  string billId = 1;
+
+  string prescriptionId = 2;
+
+  string patientId = 3;
+
+  string doctorId = 4;
+
+  double consultationFee = 5;
+
+  double medicineCost = 6;
+
+  double totalAmount = 7;
+
+  string paymentStatus = 8;
+
+  string createdAt = 9;
+
+  BillingEventType eventType = 10;
+
+  int64 occurredAt = 11;
+}
