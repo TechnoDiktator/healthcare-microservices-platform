@@ -26,8 +26,12 @@ public class DoctorGrpcService extends DoctorServicesGrpc.DoctorServicesImplBase
             DoctorSpecializationRequest request,
             StreamObserver<DoctorListResponse> responseObserver) {
 
+
+
         Specialization specialization =
-                Specialization.valueOf(request.getSpecialization());
+                Specialization.valueOf(
+                        request.getSpecialization().name()
+                );
 
         List<DoctorResponseDTO> doctors =
                 doctorService.getDoctorsBySpecialization(specialization);
@@ -51,7 +55,7 @@ public class DoctorGrpcService extends DoctorServicesGrpc.DoctorServicesImplBase
                 .setFirstName(dto.getFirstName())
                 .setLastName(dto.getLastName())
                 .setEmail(dto.getEmail())
-                .setSpecialization(dto.getSpecialization())
+                .setSpecialization(dto.getSpecialization().name())
                 .setPhoneNumber(dto.getPhoneNumber())
                 .setQualification(dto.getQualification())
                 .setExperience(dto.getExperience())

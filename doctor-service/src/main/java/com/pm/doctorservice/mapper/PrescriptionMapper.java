@@ -13,7 +13,7 @@ public class PrescriptionMapper {
     }
 
     public static Prescription toEntity(
-            UUID doctorId,
+            String doctorId,
             PrescriptionRequestDTO dto) {
 
         Prescription prescription = new Prescription();

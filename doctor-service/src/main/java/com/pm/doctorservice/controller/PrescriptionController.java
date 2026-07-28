@@ -23,7 +23,7 @@ public class PrescriptionController {
 
     @PostMapping("/{doctorId}/prescriptions")
     public ResponseEntity<PrescriptionResponseDTO> createPrescription(
-            @PathVariable UUID doctorId,
+            @PathVariable String doctorId,
             @RequestBody @Valid PrescriptionRequestDTO request) {
 
         return ResponseEntity.ok(

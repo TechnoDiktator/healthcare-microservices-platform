@@ -1,5 +1,7 @@
 package com.pm.doctorservice.dto;
 
+import com.pm.doctorservice.enums.Specialization;
+
 public class DoctorResponseDTO {
 
     private String id;
@@ -10,7 +12,7 @@ public class DoctorResponseDTO {
 
     private String email;
 
-    private String specialization;
+    private Specialization specialization;
 
     private String phoneNumber;
 
@@ -60,11 +62,11 @@ public class DoctorResponseDTO {
         this.phoneNumber = phoneNumber;
     }
 
-    public String getSpecialization() {
+    public Specialization getSpecialization() {
         return specialization;
     }
 
-    public void setSpecialization(String specialization) {
+    public void setSpecialization(Specialization specialization) {
         this.specialization = specialization;
     }
 

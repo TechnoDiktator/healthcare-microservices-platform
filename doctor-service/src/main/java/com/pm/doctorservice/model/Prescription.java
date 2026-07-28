@@ -15,7 +15,7 @@ public class Prescription {
 
     private UUID patientId;
 
-    private UUID doctorId;
+    private String doctorId;
 
     private String diagnosis;
 
@@ -48,14 +48,13 @@ public class Prescription {
         this.patientId = patientId;
     }
 
-    public UUID getDoctorId() {
+    public String getDoctorId() {
         return doctorId;
     }
 
-    public void setDoctorId(UUID doctorId) {
+    public void setDoctorId(String doctorId) {
         this.doctorId = doctorId;
     }
-
     public String getDiagnosis() {
         return diagnosis;
     }

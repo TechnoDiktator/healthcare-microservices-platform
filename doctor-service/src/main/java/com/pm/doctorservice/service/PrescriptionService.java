@@ -9,7 +9,7 @@ import java.util.UUID;
 public interface PrescriptionService {
 
     PrescriptionResponseDTO createPrescription(
-            UUID doctorId,
+            String doctorId,
             PrescriptionRequestDTO request);
 
     PrescriptionResponseDTO getPrescriptionById(

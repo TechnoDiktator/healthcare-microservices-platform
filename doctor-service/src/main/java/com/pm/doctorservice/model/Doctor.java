@@ -2,7 +2,7 @@ package com.pm.doctorservice.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
+import com.pm.doctorservice.enums.Specialization;
 
 @Document(collection = "doctors")
 public class Doctor {
@@ -13,7 +13,7 @@ public class Doctor {
     private String firstName;
     private String lastName;
     private String email;
-    private String specialization;
+    private Specialization specialization;
     private String phoneNumber;
     private String qualification;
     private Integer experience;
@@ -54,14 +54,13 @@ public class Doctor {
         this.email = email;
     }
 
-    public String getSpecialization() {
+    public Specialization getSpecialization() {
         return specialization;
     }
 
-    public void setSpecialization(String specialization) {
+    public void setSpecialization(Specialization specialization) {
         this.specialization = specialization;
     }
-
     public String getPhoneNumber() {
         return phoneNumber;
     }

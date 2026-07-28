@@ -1,5 +1,6 @@
 package com.pm.doctorservice.config;
 
+import com.pm.doctorservice.enums.Specialization;
 import com.pm.doctorservice.model.Doctor;
 import com.pm.doctorservice.repository.DoctorRepository;
 import org.springframework.boot.CommandLineRunner;
@@ -22,7 +23,7 @@ public class DoctorDataSeeder {
                     "Rahul",
                     "Sharma",
                     "rahul@example.com",
-                    "General Physician",
+                    Specialization.GENERAL_PHYSICIAN,
                     "9876543210",
                     "MBBS",
                     8
@@ -32,7 +33,7 @@ public class DoctorDataSeeder {
                     "Priya",
                     "Verma",
                     "priya@example.com",
-                    "Neurologist",
+                    Specialization.NEUROLOGIST,
                     "9876543211",
                     "MD Neurology",
                     10
@@ -42,7 +43,7 @@ public class DoctorDataSeeder {
                     "Amit",
                     "Singh",
                     "amit@example.com",
-                    "Orthopedic",
+                    Specialization.ORTHOPEDIC,
                     "9876543212",
                     "MS Orthopedics",
                     12
@@ -52,7 +53,7 @@ public class DoctorDataSeeder {
                     "Neha",
                     "Gupta",
                     "neha@example.com",
-                    "General Physician",
+                    Specialization.GENERAL_PHYSICIAN,
                     "9876543213",
                     "MBBS",
                     5
@@ -64,7 +65,7 @@ public class DoctorDataSeeder {
             String firstName,
             String lastName,
             String email,
-            String specialization,
+            Specialization specialization,
             String phone,
             String qualification,
             Integer experience) {

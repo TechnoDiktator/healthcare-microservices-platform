@@ -1,5 +1,6 @@
 package com.pm.doctorservice.dto;
 
+import com.pm.doctorservice.enums.Specialization;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -13,8 +14,8 @@ public class DoctorRequestDTO {
     @NotBlank(message = "Last name is required")
     private String lastName;
 
-    @NotBlank(message = "Specialization is required")
-    private String specialization;
+    @NotNull(message = "Specialization is required")
+    private Specialization specialization;
 
     @Email(message = "Email should be valid")
     @NotBlank(message = "Email is required")
@@ -47,14 +48,13 @@ public class DoctorRequestDTO {
         this.lastName = lastName;
     }
 
-    public String getSpecialization() {
+    public Specialization getSpecialization() {
         return specialization;
     }
 
-    public void setSpecialization(String specialization) {
+    public void setSpecialization(Specialization specialization) {
         this.specialization = specialization;
     }
-
     public String getEmail() {
         return email;
     }

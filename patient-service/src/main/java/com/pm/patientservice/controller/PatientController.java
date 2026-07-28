@@ -79,7 +79,13 @@ public class PatientController {
                 patientService.getRecommendedDoctors(id, disease)
         );
     }
+    @GetMapping("/random")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'DOCTOR')")
+    public ResponseEntity<PatientResponseDTO> getRandomPatient() {
 
+        return ResponseEntity.ok(
+                patientService.getRandomPatient());
+    }
 
 
 

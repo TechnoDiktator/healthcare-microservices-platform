@@ -72,7 +72,7 @@ public class DoctorServiceGrpcClient {
                 doctor.getLastName(),
                 doctor.getEmail(),
                 Specialization.valueOf(
-                        doctor.getSpecialization().name()
+                        doctor.getSpecialization()
                 ),
                 doctor.getPhoneNumber(),
                 doctor.getQualification(),

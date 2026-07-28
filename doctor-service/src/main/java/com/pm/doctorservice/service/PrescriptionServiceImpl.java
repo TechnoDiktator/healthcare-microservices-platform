@@ -4,13 +4,17 @@ import billing.GenerateBillResponse;
 import com.pm.doctorservice.dto.PrescriptionRequestDTO;
 import com.pm.doctorservice.dto.PrescriptionResponseDTO;
 import com.pm.doctorservice.exception.DoctorNotFoundException;
+import com.pm.doctorservice.exception.PatientNotFoundException;
 import com.pm.doctorservice.exception.PrescriptionNotFoundException;
 import com.pm.doctorservice.grpc.BillingServiceGrpcClient;
+import com.pm.doctorservice.grpc.PatientServiceGrpcClient;
 import com.pm.doctorservice.mapper.PrescriptionMapper;
 import com.pm.doctorservice.model.Doctor;
 import com.pm.doctorservice.model.Prescription;
 import com.pm.doctorservice.repository.DoctorRepository;
 import com.pm.doctorservice.repository.PrescriptionRepository;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,26 +27,43 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     private final PrescriptionRepository prescriptionRepository;
     private final DoctorRepository doctorRepository;
     private final BillingServiceGrpcClient billingClient;
-
+    private final PatientServiceGrpcClient patientServiceGrpcClient;
     public PrescriptionServiceImpl(
             PrescriptionRepository prescriptionRepository,
             DoctorRepository doctorRepository,
-            BillingServiceGrpcClient billingClient) {
+            BillingServiceGrpcClient billingClient,
+            PatientServiceGrpcClient patientServiceGrpcClient) {
 
         this.prescriptionRepository = prescriptionRepository;
         this.doctorRepository = doctorRepository;
         this.billingClient = billingClient;
+        this.patientServiceGrpcClient = patientServiceGrpcClient;
     }
 
     @Override
     public PrescriptionResponseDTO createPrescription(
-            UUID doctorId,
+            String doctorId,
             PrescriptionRequestDTO request) {
 
-        Doctor doctor = doctorRepository.findById(String.valueOf(doctorId))
+        Doctor doctor = doctorRepository.findById(doctorId)
                 .orElseThrow(() ->
                         new DoctorNotFoundException(
                                 "Doctor not found with id: " + doctorId));
+
+        // Verify patient exists
+        try {
+            patientServiceGrpcClient.getPatientById(
+                    request.getPatientId().toString());
+        } catch (StatusRuntimeException e) {
+
+            if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
+                throw new PatientNotFoundException(
+                        "Patient not found with id: "
+                                + request.getPatientId());
+            }
+
+            throw e;
+        }
 
         Prescription prescription =
                 PrescriptionMapper.toEntity(doctorId, request);
@@ -54,7 +75,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         GenerateBillResponse billResponse =
                 billingClient.generateBill(
                         prescription.getPatientId().toString(),
-                        doctor.getId().toString(),
+                        doctor.getId(),
                         prescription.getConsultationFee());
 
         prescription.setBillId(
@@ -64,7 +85,6 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
         return PrescriptionMapper.toDTO(prescription);
     }
-
     @Override
     public PrescriptionResponseDTO getPrescriptionById(
             String prescriptionId) {

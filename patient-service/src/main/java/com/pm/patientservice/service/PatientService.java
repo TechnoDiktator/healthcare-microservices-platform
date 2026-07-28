@@ -3,6 +3,7 @@ package com.pm.patientservice.service;
 import com.pm.patientservice.dto.DoctorResponseDTO;
 import com.pm.patientservice.dto.PatientRequestDTO;
 import com.pm.patientservice.dto.PatientResponseDTO;
+import com.pm.patientservice.enums.Specialization;
 import com.pm.patientservice.exception.EmailAlreadyExistsException;
 import com.pm.patientservice.exception.PatientNotFoundException;
 import com.pm.patientservice.grpc.DoctorServiceGrpcClient;
@@ -18,9 +19,10 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
-public class PatientService {
+public class PatientService implements IPatientService {
 
     private final PatientRepository patientRepository;
     private final KafkaProducer kafkaProducer;
@@ -116,21 +118,39 @@ public class PatientService {
         return PatientMapper.toDTO(patient);
     }
 
+    @Override
     public List<DoctorResponseDTO> getRecommendedDoctors(
             UUID patientId,
             String disease) {
 
-        log.info("Fetching recommended doctors for patient {} with disease {}", patientId, disease);
+        log.info("Fetching recommended doctors for patient {} with disease {}",
+                patientId, disease);
 
         patientRepository.findById(patientId)
                 .orElseThrow(() ->
                         new PatientNotFoundException(
                                 "Patient not found with id: " + patientId));
 
-        String specialization = diseaseMapper.getSpecialization(disease);
+        Specialization specialization = diseaseMapper.getSpecialization(disease);
 
-        log.info("Mapped disease {} to specialization {}", disease, specialization);
+        log.info("Mapped disease {} to specialization {}",
+                disease, specialization);
 
         return doctorClient.getDoctorsBySpecialization(specialization);
+    }
+
+    @Override
+    public PatientResponseDTO getRandomPatient() {
+
+        List<Patient> patients = patientRepository.findAll();
+
+        if (patients.isEmpty()) {
+            throw new PatientNotFoundException("No patients found.");
+        }
+
+        Patient patient = patients.get(
+                ThreadLocalRandom.current().nextInt(patients.size()));
+
+        return PatientMapper.toDTO(patient);
     }
 }

@@ -19,11 +19,11 @@ public class DoctorMapper {
         doctor.setQualification(dto.getQualification());
         doctor.setExperience(dto.getExperience());
 
-        // Default value for a newly created doctor
         doctor.setAvailable(true);
 
         return doctor;
     }
+
 
     public static DoctorResponseDTO toDoctorResponseDTO(Doctor doctor) {
 
@@ -41,6 +41,7 @@ public class DoctorMapper {
 
         return dto;
     }
+
 
 
     public static void updateDoctorFromRequest(Doctor doctor,
