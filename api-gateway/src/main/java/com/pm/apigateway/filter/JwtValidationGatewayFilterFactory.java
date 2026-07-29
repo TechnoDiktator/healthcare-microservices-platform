@@ -67,6 +67,13 @@ public class JwtValidationGatewayFilterFactory extends AbstractGatewayFilterFact
                            );
                        })
                        .onErrorResume(e -> {
+
+
+                           e.printStackTrace();
+
+                           System.out.println("JWT validation failed: " + e.getMessage());
+
+
                            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                            return exchange.getResponse().setComplete();
                        });

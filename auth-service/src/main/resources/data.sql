@@ -72,4 +72,4 @@ VALUES
      '$2a$10$xuN2kIzofZKerhRzCBYnTOZxXy4nH5lpV.Bn89Gt36TbUTb/RjcwO',
      'DOCTOR')
 
-    ON CONFLICT (email) DO NOTHING;
+    ON CONFLICT DO NOTHING;
