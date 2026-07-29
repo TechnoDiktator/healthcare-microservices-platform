@@ -475,15 +475,18 @@ Base path: /auth (through gateway) or / on the service itself
 
 Base path: /api/patients (through gateway) or /patients on the service
 
-| Method | Endpoint | Description | Auth |
+| Method | Endpoint | Description | Roles |
 | --- | --- | --- | --- |
-| GET | /api/patients | Get all patients | Authenticated |
-| POST | /api/patients | Create a patient | Authenticated |
-| PUT | /api/patients/{id} | Update a patient | Authenticated |
-| GET | /api/patients/random | Fetch a random patient | Authenticated |
-| GET | /api/patients/{id}/recommended-doctors?disease={disease} | Recommend doctors by patient complaint | Authenticated |
-| GET | /api/patients/{patientId}/bills/{billId} | Retrieve a patient bill | Authenticated |
-| PUT | /api/patients/{patientId}/bills/{billId}/pay | Pay a patient bill | Authenticated |
+| GET | /api/patients | Get all patients | ADMIN, STAFF, DOCTOR |
+| POST | /api/patients | Create a patient | ADMIN, STAFF, DOCTOR |
+| PUT | /api/patients/{id} | Update a patient | ADMIN, STAFF, DOCTOR |
+| DELETE | /api/patients/delete/{id} | Delete a patient | ADMIN, STAFF, DOCTOR |
+| GET | /api/patients/{id} | Get patient by ID | ADMIN, STAFF, DOCTOR |
+| GET | /api/patients/random | Fetch a random patient | ADMIN, STAFF, DOCTOR |
+| GET | /api/patients/{id}/recommended-doctors?disease={disease} | Recommend doctors by patient complaint | ADMIN, STAFF, DOCTOR |
+| GET | /api/patients/{patientId}/bills/{billId} | Retrieve a patient bill | ADMIN, PATIENT |
+| PUT | /api/patients/{patientId}/bills/{billId}/pay | Pay a patient bill | ADMIN, PATIENT |
+| GET | /api/patients/bills | Get all bills | ADMIN |
 
 #### Patient request bodies
 
@@ -512,19 +515,21 @@ Base path: /api/patients (through gateway) or /patients on the service
 
 Base path: /api/doctors (through gateway) or /doctors on the service
 
-| Method | Endpoint | Description | Auth |
+| Method | Endpoint | Description | Roles |
 | --- | --- | --- | --- |
 | GET | /api/doctors | Get all doctors | Authenticated |
-| POST | /api/doctors | Create a doctor and register it in Auth Service | Authenticated |
-| PUT | /api/doctors/{id} | Update a doctor | Authenticated |
-| DELETE | /api/doctors/{id} | Delete a doctor | Authenticated |
+| POST | /api/doctors | Create a doctor and register it in Auth Service | ADMIN |
+| PUT | /api/doctors/{id} | Update a doctor | ADMIN |
+| DELETE | /api/doctors/{id} | Delete a doctor | ADMIN |
 | GET | /api/doctors/specialization/{specialization} | Get doctors by specialization | Authenticated |
 | GET | /api/doctors/recommend?specialization={specialization} | Recommend doctors by specialization | Authenticated |
-| POST | /api/doctors/{doctorId}/prescriptions | Create a prescription for a doctor | Authenticated |
-| GET | /api/doctors/{doctorId}/prescriptions | Get all prescriptions for a doctor | Authenticated |
-| GET | /api/doctors/patients/{patientId}/prescriptions | Get prescriptions for a patient | Authenticated |
-| GET | /api/doctors/prescriptions/{prescriptionId} | Get a prescription by ID | Authenticated |
-| DELETE | /api/doctors/prescriptions/{prescriptionId} | Delete a prescription | Authenticated |
+| POST | /api/doctors/{doctorId}/prescriptions | Create a prescription for a doctor | ADMIN, DOCTOR (doctorId owner) |
+| GET | /api/doctors/{doctorId}/prescriptions | Get all prescriptions for a doctor | ADMIN, STAFF, COMPOUNDER, DOCTOR (doctorId owner) |
+| GET | /api/doctors/patients/{patientId}/prescriptions | Get prescriptions for a patient | ADMIN, STAFF, COMPOUNDER, DOCTOR, PATIENT (patientId owner) |
+| GET | /api/doctors/prescriptions/{prescriptionId} | Get a prescription by ID | ADMIN, STAFF, COMPOUNDER, DOCTOR (doctor owner), PATIENT (patient owner) |
+| DELETE | /api/doctors/prescriptions/{prescriptionId} | Delete a prescription | ADMIN, DOCTOR (doctor owner) |
+
+> Note: Doctor prescription endpoints use custom authorization logic in the controller layer, so access is granted based on both role and resource ownership.
 
 #### Doctor request bodies
 
@@ -574,12 +579,14 @@ Base path: /api/doctors (through gateway) or /doctors on the service
 
 Base path: /api/analytics (through gateway) or /analytics on the service
 
-| Method | Endpoint | Description | Auth |
+| Method | Endpoint | Description | Roles |
 | --- | --- | --- | --- |
-| GET | /api/analytics/patients | Get all patient analytics projections | Authenticated |
-| GET | /api/analytics/doctors | Get all doctor analytics projections | Authenticated |
-| GET | /api/analytics/prescriptions | Get all prescription analytics projections | Authenticated |
-| GET | /api/analytics/billings | Get all billing analytics projections | Authenticated |
+| GET | /api/analytics/patients | Get all patient analytics projections | Authenticated (gateway only) |
+| GET | /api/analytics/doctors | Get all doctor analytics projections | Authenticated (gateway only) |
+| GET | /api/analytics/prescriptions | Get all prescription analytics projections | Authenticated (gateway only) |
+| GET | /api/analytics/billings | Get all billing analytics projections | Authenticated (gateway only) |
+
+> Note: Analytics controller methods do not apply controller-level role restrictions; they rely on gateway authentication and routing.
 
 ---
 
