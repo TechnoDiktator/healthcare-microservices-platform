@@ -221,6 +221,7 @@ The project uses Docker Compose to start the core infrastructure and service con
 - MongoDB for doctor service data and analytics projections.
 - Kafka broker for asynchronous event streaming.
 - All Spring Boot services are containerized and joined on a Docker network.
+- Each service exposes Spring Boot Actuator endpoints for health and operational metrics.
 
 The analytics stack now persists event projections into MongoDB, allowing the Analytics Service to provide read models for:
 
@@ -301,6 +302,15 @@ To remove stopped containers, networks, and volumes created by compose:
 ```bash
 docker compose down --volumes
 ```
+
+To inspect container health via Actuator endpoints from inside the container:
+
+```bash
+docker compose exec <service-name> sh
+curl -f http://localhost:<service-port>/actuator/health
+```
+
+Each Spring Boot service exposes Actuator health and info endpoints, so you can verify runtime health directly from the container.
 
 Then access the services through the gateway and service-specific ports defined in the Docker Compose setup.
 
