@@ -1,12 +1,15 @@
 package com.pm.patientservice.service;
 
 import billing.BillResponse;
+import billing.GetAllBillsResponse;
 import billing.PaymentResponse;
 import com.pm.patientservice.dto.BillResponseDTO;
 import com.pm.patientservice.dto.PaymentResponseDTO;
 import com.pm.patientservice.grpc.BillingGrpcClient;
 import com.pm.patientservice.mapper.BillMapper;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class BillServiceImpl implements BillService {
@@ -43,4 +46,19 @@ public class BillServiceImpl implements BillService {
 
         return billMapper.toDTO(response);
     }
+
+    @Override
+    public List<BillResponseDTO> getAllBills() {
+
+        GetAllBillsResponse response =
+                billingGrpcClient.getAllBills();
+
+        return response.getBillsList()
+                .stream()
+                .map(billMapper::toDTO)
+                .toList();
+    }
+
+
+
 }

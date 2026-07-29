@@ -13,9 +13,15 @@ service BillingService {
 
   // Mark a bill as paid
   rpc PayBill(PayBillRequest) returns (PaymentResponse);
+  rpc GetAllBills(GetAllBillsRequest) returns (GetAllBillsResponse);
 
 }
+message GetAllBillsRequest {
+}
 
+message GetAllBillsResponse {
+  repeated BillResponse bills = 1;
+}
 message GenerateBillRequest {
 
   string prescriptionId = 1;

@@ -3,6 +3,8 @@ package com.pm.patientservice.service;
 import com.pm.patientservice.dto.BillResponseDTO;
 import com.pm.patientservice.dto.PaymentResponseDTO;
 
+import java.util.List;
+
 public interface BillService {
 
     BillResponseDTO getBill(
@@ -12,4 +14,8 @@ public interface BillService {
     PaymentResponseDTO payBill(
             String patientId,
             String billId);
+
+
+    List<BillResponseDTO> getAllBills();
+
 }

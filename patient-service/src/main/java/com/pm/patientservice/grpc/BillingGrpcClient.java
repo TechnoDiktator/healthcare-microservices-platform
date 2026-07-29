@@ -1,10 +1,6 @@
 package com.pm.patientservice.grpc;
 
-import billing.BillResponse;
-import billing.BillingServiceGrpc;
-import billing.GetBillRequest;
-import billing.PayBillRequest;
-import billing.PaymentResponse;
+import billing.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,4 +44,16 @@ public class BillingGrpcClient {
 
         return billingStub.payBill(request);
     }
+
+
+    public GetAllBillsResponse getAllBills() {
+
+        GetAllBillsRequest request =
+                GetAllBillsRequest.newBuilder()
+                        .build();
+
+        return billingStub.getAllBills(request);
+    }
+
+
 }

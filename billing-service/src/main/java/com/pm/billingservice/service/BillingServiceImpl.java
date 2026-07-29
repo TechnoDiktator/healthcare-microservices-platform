@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import billing.events.BillingEventType;
 import com.pm.billingservice.kafka.BillingEventPublisher;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -89,5 +90,11 @@ public class BillingServiceImpl implements BillingService {
                 BillingEventType.BILL_PAID);
 
         return updatedBill;
+    }
+
+    @Override
+    public List<Bill> getAllBills() {
+
+        return billRepository.findAll();
     }
 }

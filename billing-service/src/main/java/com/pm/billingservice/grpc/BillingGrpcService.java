@@ -1,12 +1,6 @@
 package com.pm.billingservice.grpc;
 
-import billing.BillResponse;
-import billing.BillingServiceGrpc;
-import billing.GenerateBillRequest;
-import billing.GenerateBillResponse;
-import billing.GetBillRequest;
-import billing.PayBillRequest;
-import billing.PaymentResponse;
+import billing.*;
 import com.pm.billingservice.exception.BillAlreadyPaidException;
 import com.pm.billingservice.exception.BillNotFoundException;
 import com.pm.billingservice.mapper.BillingMapper;
@@ -159,4 +153,41 @@ public class BillingGrpcService extends BillingServiceGrpc.BillingServiceImplBas
                             .asRuntimeException());
         }
     }
+
+
+
+    @Override
+    public void getAllBills(
+            GetAllBillsRequest request,
+            StreamObserver<GetAllBillsResponse> responseObserver) {
+
+        try {
+
+            log.info("GetAllBills request received");
+
+            GetAllBillsResponse response =
+                    GetAllBillsResponse.newBuilder()
+                            .addAllBills(
+                                    billingService.getAllBills()
+                                            .stream()
+                                            .map(BillingMapper::toBillResponse)
+                                            .toList())
+                            .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+
+        } catch (Exception ex) {
+
+            log.error("Failed to fetch all bills", ex);
+
+            responseObserver.onError(
+                    Status.INTERNAL
+                            .withDescription("Unable to fetch bills.")
+                            .asRuntimeException());
+        }
+    }
+
+
+
 }
