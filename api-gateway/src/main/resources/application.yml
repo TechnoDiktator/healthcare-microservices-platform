@@ -64,7 +64,15 @@ spring:
           filters:
             - StripPrefix=1
             - JwtValidation
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
 
+  endpoint:
+    health:
+      show-details: always
 
 #
 #  This file is the heart of your API Gateway. Think of it as a reverse proxy with routing rules.
