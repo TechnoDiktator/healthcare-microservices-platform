@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
 
   #################################################
@@ -451,3 +449,7 @@ volumes:
   doctor-mongodb-data:
   analytics-mongodb-data:
   kafka-data:
+
+networks:
+  internal:
+    driver: bridge
