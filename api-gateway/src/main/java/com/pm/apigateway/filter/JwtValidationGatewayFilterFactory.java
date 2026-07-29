@@ -49,7 +49,10 @@ public class JwtValidationGatewayFilterFactory extends AbstractGatewayFilterFact
                        .retrieve()
                        .bodyToMono(AuthenticatedUserResponseDTO.class)
                        .flatMap(user -> {
-
+                           System.out.println("Authenticated User:");
+                           System.out.println("User ID : " + user.userId());
+                           System.out.println("Email   : " + user.email());
+                           System.out.println("Role    : " + user.role());
                            ServerHttpRequest request = exchange.getRequest()
                                    .mutate()
                                    .header("X-User-Id", user.userId().toString())

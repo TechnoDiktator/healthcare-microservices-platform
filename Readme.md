@@ -142,14 +142,14 @@ flowchart LR
 
 ## 🧩 Microservices
 
-| Service | Primary responsibility | Data store | Communication style |
+| Service | Primary responsibility | Primary data store | Communication style |
 | --- | --- | --- | --- |
-| API Gateway | Central entry point for incoming requests | None | REST routing |
+| API Gateway | Central entry point and request routing | None | REST routing, JWT filtering |
 | Auth Service | Authentication, authorization, and token validation | PostgreSQL | REST |
-| Patient Service | Patient CRUD and patient lifecycle workflows | PostgreSQL | REST, gRPC, Kafka |
-| Doctor Service | Doctor management and doctor-related workflows | MongoDB | REST, gRPC, Kafka |
-| Billing Service | Billing generation and billing records | PostgreSQL | REST, gRPC, Kafka |
-| Analytics Service | Consumes events and builds analytics/read models | MongoDB | Kafka |
+| Patient Service | Patient CRUD, validation, and workflow coordination | PostgreSQL | REST, gRPC, Kafka |
+| Doctor Service | Doctor profile management and prescription workflows | MongoDB | REST, gRPC, Kafka |
+| Billing Service | Billing generation, invoices, and payment lifecycle | PostgreSQL | REST, gRPC, Kafka |
+| Analytics Service | Event-driven projection and reporting read models | MongoDB | Kafka ingestion, REST read API |
 
 ---
 
@@ -168,7 +168,9 @@ Used for internal service-to-service calls such as:
 ### Kafka
 Used for asynchronous event propagation between services.
 
-The Analytics Service listens to business events published by the other services so it can maintain reporting data without tight coupling.
+- The Analytics Service listens to Kafka topics published by the other services and persists projection documents into MongoDB.
+- Patient events are published to `patient-events`, doctor events to `doctor-events`, billing events to `billing-events`, and prescription events to `prescription-events`.
+- The Analytics Service deserializes protobuf event payloads and stores patient, doctor, billing, and prescription projections for reporting.
 
 ---
 
@@ -191,39 +193,98 @@ patient-management/
 
 ## 🐳 Infrastructure and Runtime
 
-The project uses Docker Compose to start the core infrastructure:
+The project uses Docker Compose to start the core infrastructure and service containers.
 
-- PostgreSQL databases for auth, patient, and billing
-- MongoDB for doctor and analytics data
-- Kafka for event streaming
-- All Spring Boot services as containerized apps
+- PostgreSQL databases for auth, patient, and billing services.
+- MongoDB for doctor service data and analytics projections.
+- Kafka broker for asynchronous event streaming.
+- All Spring Boot services are containerized and joined on a Docker network.
+
+The analytics stack now persists event projections into MongoDB, allowing the Analytics Service to provide read models for:
+
+- patient activity and registration history
+- doctor profiles and availability
+- billing and payment summaries
+- prescription details and medication records
 
 A typical startup flow is:
 
 1. Start the infrastructure with Docker Compose.
 2. Start the microservices.
-3. Route requests through the API Gateway.
-4. Let the services publish events to Kafka for analytics consumption.
+3. Route client requests through the API Gateway.
+4. Let the services publish events to Kafka.
+5. The Analytics Service consumes events and persists projection documents into MongoDB.
 
 ---
 
 ## 🚀 Running the Project
 
-From the repository root:
+From the repository root, start the infrastructure and services with Docker Compose:
 
 ```bash
 docker compose up --build
+```
+
+If you want to run it in detached mode:
+
+```bash
+docker compose up --build -d
+```
+
+To stop the application and remove containers:
+
+```bash
+docker compose down
+```
+
+To rebuild a single service after changes:
+
+```bash
+docker compose build <service-name>
+```
+
+To list the service containers started by Docker Compose:
+
+```bash
+docker compose ps
+```
+
+To view logs for all services:
+
+```bash
+docker compose logs -f
+```
+
+To view logs for a specific service:
+
+```bash
+docker compose logs -f <service-name>
+```
+
+To restart a specific service:
+
+```bash
+docker compose restart <service-name>
+```
+
+To remove stopped containers, networks, and volumes created by compose:
+
+```bash
+docker compose down --volumes
 ```
 
 Then access the services through the gateway and service-specific ports defined in the Docker Compose setup.
 
 Example entry points:
 
-- API Gateway: http://localhost:8080
-- Auth Service: http://localhost:8081
+- API Gateway: http://localhost:4004
+- Auth Service: http://localhost:4005
 - Patient Service: http://localhost:4000
-- Doctor Service: http://localhost:8082
-- Billing Service: http://localhost:8083
+- Doctor Service: http://localhost:8080
+- Billing Service: http://localhost:4001
+- Analytics Service: http://localhost:4002
+
+Use the gateway for most client requests so authentication, routing, and JWT handling happen consistently.
 
 ---
 
@@ -243,7 +304,7 @@ Example entry points:
 
 ---
 
-## � REST API Reference
+## REST API Reference
 
 The gateway exposes the public entry points, and the individual services expose their own REST endpoints underneath.
 
@@ -353,8 +414,7 @@ Service name: PatientService
 - PatientResponse: id, name, email, address, date_of_birth
 
 ---
-
-## �🎯 What this project demonstrates
+##  What this project demonstrates
 
 This repository is a good example of:
 
