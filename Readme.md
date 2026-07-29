@@ -18,6 +18,14 @@ The system is designed so each service can evolve independently while still coop
 
 ---
 
+## API Testing
+
+The complete Postman collection is available here:
+
+📁 [Postman Collection](api-requests/postman_collection/SpBootGrpcProject.postman_collection.json)
+
+Import the collection into Postman and update the JWT token variables after logging in.
+
 ## 🏗️ Architecture
 
 The system is organized as a layered microservices architecture with a central gateway, domain services, event streaming, and separate data stores.

@@ -57,7 +57,13 @@ spring:
             - StripPrefix=1
             - JwtValidation
 
-
+        - id: analytics-service-route
+          uri: http://analytics-service:8080
+          predicates:
+            - Path=/api/analytics/**
+          filters:
+            - StripPrefix=1
+            - JwtValidation
 
 
 #

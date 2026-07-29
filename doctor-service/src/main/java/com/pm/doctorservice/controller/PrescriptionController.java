@@ -86,6 +86,10 @@ public class PrescriptionController {
         return ResponseEntity.ok(
                 prescriptionService.getPrescriptionsByDoctor(doctorId));
     }
+
+
+
+
     @GetMapping("/patients/{patientId}/prescriptions")
     public ResponseEntity<List<PrescriptionResponseDTO>> getPatientPrescriptions(
             @PathVariable UUID patientId) {
@@ -102,6 +106,9 @@ public class PrescriptionController {
         return ResponseEntity.ok(
                 prescriptionService.getPrescriptionsByPatient(patientId));
     }
+
+
+
     @DeleteMapping("/prescriptions/{prescriptionId}")
     public ResponseEntity<Void> deletePrescription(
             @PathVariable String prescriptionId) {

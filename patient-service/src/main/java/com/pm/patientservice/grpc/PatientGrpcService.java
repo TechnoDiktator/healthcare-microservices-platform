@@ -5,7 +5,8 @@ import com.pm.patientservice.repository.PatientRepository;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -13,11 +14,15 @@ import java.util.concurrent.ThreadLocalRandom;
 @GrpcService
 public class PatientGrpcService extends PatientServiceGrpc.PatientServiceImplBase {
     private final PatientRepository patientRepository;
-
+    private static final Logger log =
+            LoggerFactory.getLogger(PatientGrpcService.class);
     public PatientGrpcService(PatientRepository patientRepository) {
         this.patientRepository = patientRepository;
     }
     @Override
+
+
+
     public void getPatientById(
             GetPatientRequest request,
             StreamObserver<PatientResponse> responseObserver) {
@@ -26,16 +31,30 @@ public class PatientGrpcService extends PatientServiceGrpc.PatientServiceImplBas
 
             UUID patientId = UUID.fromString(request.getPatientId());
 
+            log.info("Received gRPC request for patientId={}", patientId);
+
+            long count = patientRepository.count();
+            log.info("Total patients in database={}", count);
+
+            patientRepository.findAll().forEach(patient ->
+                    log.info("Patient in DB: {}", patient.getId()));
+
             Patient patient = patientRepository.findById(patientId)
                     .orElse(null);
 
             if (patient == null) {
+                log.warn("Patient not found. Requested patientId={}", patientId);
+
                 responseObserver.onError(
                         Status.NOT_FOUND
                                 .withDescription("Patient not found with id: " + patientId)
                                 .asRuntimeException());
                 return;
             }
+
+            log.info("Patient found. Id={}, Name={}",
+                    patient.getId(),
+                    patient.getName());
 
             PatientResponse response = PatientResponse.newBuilder()
                     .setId(patient.getId().toString())
@@ -64,7 +83,6 @@ public class PatientGrpcService extends PatientServiceGrpc.PatientServiceImplBas
                             .asRuntimeException());
         }
     }
-
     @Override
     public void getRandomPatient(
             Empty request,

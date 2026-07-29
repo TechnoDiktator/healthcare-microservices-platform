@@ -12,7 +12,7 @@ public interface PrescriptionRepository
 
     List<Prescription> findByPatientId(UUID patientId);
 
-    List<Prescription> findByDoctorId(UUID doctorId);
+    List<Prescription> findByDoctorId(String doctorId);
 
     List<Prescription> findByPatientIdAndDoctorId(
             UUID patientId,

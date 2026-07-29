@@ -87,7 +87,15 @@ public class PatientController {
                 patientService.getRandomPatient());
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "Get patient by ID")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'DOCTOR')")
+    public ResponseEntity<PatientResponseDTO> getPatientById(
+            @PathVariable UUID id) {
 
+        return ResponseEntity.ok(
+                patientService.getPatientById(id));
+    }
 
 
 }

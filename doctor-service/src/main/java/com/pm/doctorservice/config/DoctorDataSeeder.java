@@ -14,7 +14,7 @@ public class DoctorDataSeeder {
     CommandLineRunner seedDoctors(DoctorRepository repository) {
 
         return args -> {
-
+            repository.deleteAll();
             if (repository.count() > 0) {
                 return;
             }

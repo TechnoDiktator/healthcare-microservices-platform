@@ -189,11 +189,12 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     public List<PrescriptionResponseDTO> getPrescriptionsByDoctor(
             UUID doctorId) {
 
-        return prescriptionRepository.findByDoctorId(doctorId)
+        return prescriptionRepository.findByDoctorId(doctorId.toString())
                 .stream()
                 .map(PrescriptionMapper::toDTO)
                 .toList();
     }
+
 
     @Override
     public List<PrescriptionResponseDTO> getPrescriptionsByPatient(
