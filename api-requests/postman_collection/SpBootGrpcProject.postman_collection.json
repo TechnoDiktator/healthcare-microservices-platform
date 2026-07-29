@@ -145,6 +145,14 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "gateway-actuator-health",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
         }
       ]
     },
@@ -152,7 +160,7 @@
       "name": "patient-service",
       "item": [
         {
-          "name": "login",
+          "name": "login-as-admin",
           "request": {
             "method": "POST",
             "header": [
@@ -571,7 +579,7 @@
               "response": []
             },
             {
-              "name": "get-prescription-by-doctor",
+              "name": "delete-prescription",
               "request": {
                 "method": "DELETE",
                 "header": [
@@ -611,6 +619,35 @@
           "item": [
             {
               "name": "get-bill",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{json_web_token_0h7f}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:4004/api/patients/123e4567-e89b-12d3-a456-426614174001/bills/90000000-0000-0000-0000-000000000002",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4004",
+                  "path": [
+                    "api",
+                    "patients",
+                    "123e4567-e89b-12d3-a456-426614174001",
+                    "bills",
+                    "90000000-0000-0000-0000-000000000002"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "get-all-bills",
               "request": {
                 "method": "GET",
                 "header": [
