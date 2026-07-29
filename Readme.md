@@ -223,6 +223,49 @@ The project uses Docker Compose to start the core infrastructure and service con
 - All Spring Boot services are containerized and joined on a Docker network.
 - Each service exposes Spring Boot Actuator endpoints for health and operational metrics.
 
+### Docker Compose dependency graph
+
+```mermaid
+flowchart TD
+    AuthDB[auth-service-db]
+    PatientDB[patient-service-db]
+    BillingDB[billing-service-db]
+    DoctorMongo[doctor-mongodb]
+    AnalyticsMongo[analytics-mongo-db]
+    Kafka[kafka]
+    Auth[auth-service]
+    Patient[patient-service]
+    Billing[billing-service]
+    Doctor[doctor-service]
+    Analytics[analytics-service]
+    Gateway[api-gateway]
+
+    AuthDB --> Auth
+    PatientDB --> Patient
+    BillingDB --> Billing
+    DoctorMongo --> Doctor
+    AnalyticsMongo --> Analytics
+    Kafka --> Billing
+    Kafka --> Patient
+    Kafka --> Doctor
+    Kafka --> Analytics
+    Auth --> Doctor
+    Patient --> Doctor
+    Billing --> Doctor
+    Auth --> Gateway
+```
+
+This dependency graph reflects the Docker Compose `depends_on` relationships and the service startup order:
+
+- `auth-service` waits for `auth-service-db`.
+- `patient-service` waits for `patient-service-db` and `kafka`.
+- `billing-service` waits for `billing-service-db` and `kafka`.
+- `doctor-service` waits for `doctor-mongodb`, `kafka`, `auth-service`, `patient-service`, and `billing-service`.
+- `analytics-service` waits for `analytics-mongo-db` and `kafka`.
+- `api-gateway` waits for `auth-service`.
+
+The graph helps show which services depend on database or messaging infrastructure before becoming healthy.
+
 The analytics stack now persists event projections into MongoDB, allowing the Analytics Service to provide read models for:
 
 - patient activity and registration history
