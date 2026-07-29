@@ -132,7 +132,7 @@ public class BillController {
                 user.getRole()
         );
 
-        List<BillResponseDTO> bills = billService.;
+        List<BillResponseDTO> bills = billService.getAllBills();
 
         log.info("Successfully fetched {} bills", bills.size());
 
