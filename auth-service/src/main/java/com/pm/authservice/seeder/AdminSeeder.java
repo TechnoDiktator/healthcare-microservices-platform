@@ -9,6 +9,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Component
 public class AdminSeeder implements CommandLineRunner {
 
@@ -33,6 +35,7 @@ public class AdminSeeder implements CommandLineRunner {
         }
 
         User admin = new User();
+        admin.setId(UUID.randomUUID());
         admin.setEmail("admin@hospital.com");
         admin.setFirstName("System");
         admin.setLastName("Administrator");
