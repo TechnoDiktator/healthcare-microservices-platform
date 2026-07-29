@@ -399,6 +399,9 @@ Each Spring Boot service exposes Actuator health and info endpoints, so you can 
 
 Then access the services through the gateway and service-specific ports defined in the Docker Compose setup.
 
+> Warning: Use the existing `pom.xml` files from the project and do not modify dependencies while running locally.
+> For the most reliable local environment, use Docker Compose as documented above.
+
 Example entry points:
 
 - API Gateway: http://localhost:4004
