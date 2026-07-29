@@ -207,6 +207,13 @@ The analytics stack now persists event projections into MongoDB, allowing the An
 - billing and payment summaries
 - prescription details and medication records
 
+The application also includes seeded test data across multiple services:
+
+- `auth-service` seeds an admin user via `AdminSeeder.java` and adds sample doctor accounts via `auth-service/src/main/resources/data.sql`.
+- `patient-service` inserts initial patient records from `patient-service/src/main/resources/data.sql`.
+- `doctor-service` seeds doctor profiles in `DoctorDataSeeder.java` using Spring Boot `CommandLineRunner`.
+- `billing-service` inserts billing records from `billing-service/src/main/resources/data.sql`.
+
 A typical startup flow is:
 
 1. Start the infrastructure with Docker Compose.
