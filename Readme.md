@@ -433,7 +433,12 @@ Use the gateway for most client requests so authentication, routing, and JWT han
 
 ## REST API Reference
 
-The gateway exposes the public entry points, and the individual services expose their own REST endpoints underneath.
+The gateway exposes the public entry points, and the individual services expose their own REST endpoints underneath. The Postman collection in `api-requests/postman_collection` contains the request examples, bearer token templates, and payload shapes.
+
+### Common headers
+
+- `Content-Type: application/json` for POST/PUT payloads
+- `Authorization: Bearer <token>` for protected endpoints
 
 ### Auth Service
 
@@ -441,17 +446,30 @@ Base path: /auth (through gateway) or / on the service itself
 
 | Method | Endpoint | Description | Auth |
 | --- | --- | --- | --- |
+| POST | /auth/register | Register a new user account | Public |
 | POST | /auth/login | Authenticate a user and return a token | Public |
 | GET | /auth/validate | Validate a bearer token | Required |
-| POST | /auth/register | Register a new user account | Public |
 
-### Internal Auth Management
+#### Auth request bodies
 
-| Method | Endpoint | Description | Auth |
-| --- | --- | --- | --- |
-| POST | /internal/users | Create an internal user | Internal |
-| PUT | /internal/users/{id} | Update an internal user | Internal |
-| DELETE | /internal/users/{id} | Delete an internal user | Internal |
+- `POST /auth/register`
+```json
+{
+  "firstName": "Memnon",
+  "lastName": "Sharma",
+  "email": "emnon@test.com",
+  "password": "password123",
+  "role": "DOCTOR"
+}
+```
+
+- `POST /auth/login`
+```json
+{
+  "email": "memnon@test.com",
+  "password": "password123"
+}
+```
 
 ### Patient Service
 
@@ -459,14 +477,36 @@ Base path: /api/patients (through gateway) or /patients on the service
 
 | Method | Endpoint | Description | Auth |
 | --- | --- | --- | --- |
-| GET | /api/patients | Get all patients | ADMIN, STAFF, DOCTOR |
-| POST | /api/patients | Create a patient | ADMIN, STAFF, DOCTOR |
-| PUT | /api/patients/{id} | Update a patient | ADMIN, STAFF, DOCTOR |
-| DELETE | /api/patients/delete/{id} | Delete a patient | ADMIN, STAFF, DOCTOR |
-| GET | /api/patients/{id}/recommended-doctors | Get doctors recommended for a patient condition | ADMIN, STAFF, DOCTOR |
-| GET | /api/patients/random | Fetch a random patient | ADMIN, STAFF, DOCTOR |
-| GET | /api/patients/{patientId}/bills/{billId} | Retrieve a patient bill | ADMIN, PATIENT |
-| PUT | /api/patients/{patientId}/bills/{billId}/pay | Pay a patient bill | ADMIN, PATIENT |
+| GET | /api/patients | Get all patients | Authenticated |
+| POST | /api/patients | Create a patient | Authenticated |
+| PUT | /api/patients/{id} | Update a patient | Authenticated |
+| GET | /api/patients/random | Fetch a random patient | Authenticated |
+| GET | /api/patients/{id}/recommended-doctors?disease={disease} | Recommend doctors by patient complaint | Authenticated |
+| GET | /api/patients/{patientId}/bills/{billId} | Retrieve a patient bill | Authenticated |
+| PUT | /api/patients/{patientId}/bills/{billId}/pay | Pay a patient bill | Authenticated |
+
+#### Patient request bodies
+
+- `POST /api/patients`
+```json
+{
+  "name": "Bruce Wayne",
+  "email": "bruce.wayne@example.com",
+  "address": "1007 Mountain Drive, Gotham",
+  "dateOfBirth": "1985-02-19",
+  "registeredDate": "2026-07-27"
+}
+```
+
+- `PUT /api/patients/{id}`
+```json
+{
+  "name": "Bruce Wayne Updated",
+  "email": "bruce.wayne@example.com",
+  "address": "Wayne Manor, Gotham",
+  "dateOfBirth": "1985-02-19"
+}
+```
 
 ### Doctor Service
 
@@ -474,18 +514,72 @@ Base path: /api/doctors (through gateway) or /doctors on the service
 
 | Method | Endpoint | Description | Auth |
 | --- | --- | --- | --- |
-| POST | /api/doctors | Create a doctor | ADMIN |
-| GET | /api/doctors/{id} | Get a doctor by ID | Authenticated |
 | GET | /api/doctors | Get all doctors | Authenticated |
-| PUT | /api/doctors/{id} | Update a doctor | ADMIN |
-| DELETE | /api/doctors/{id} | Delete a doctor | ADMIN |
+| POST | /api/doctors | Create a doctor and register it in Auth Service | Authenticated |
+| PUT | /api/doctors/{id} | Update a doctor | Authenticated |
+| DELETE | /api/doctors/{id} | Delete a doctor | Authenticated |
 | GET | /api/doctors/specialization/{specialization} | Get doctors by specialization | Authenticated |
-| GET | /api/doctors/recommend | Recommend doctors by specialization | Authenticated |
+| GET | /api/doctors/recommend?specialization={specialization} | Recommend doctors by specialization | Authenticated |
 | POST | /api/doctors/{doctorId}/prescriptions | Create a prescription for a doctor | Authenticated |
-| GET | /api/doctors/prescriptions/{prescriptionId} | Get a prescription by ID | Authenticated |
-| GET | /api/doctors/{doctorId}/prescriptions | Get prescriptions for a doctor | Authenticated |
+| GET | /api/doctors/{doctorId}/prescriptions | Get all prescriptions for a doctor | Authenticated |
 | GET | /api/doctors/patients/{patientId}/prescriptions | Get prescriptions for a patient | Authenticated |
+| GET | /api/doctors/prescriptions/{prescriptionId} | Get a prescription by ID | Authenticated |
 | DELETE | /api/doctors/prescriptions/{prescriptionId} | Delete a prescription | Authenticated |
+
+#### Doctor request bodies
+
+- `POST /api/doctors`
+```json
+{
+  "firstName": "Tarang",
+  "lastName": "RastogitheSecond",
+  "email": "tr@example.com",
+  "password": "password123",
+  "specialization": "NEUROLOGIST",
+  "phoneNumber": "92299232389",
+  "qualification": "MBBS, MD",
+  "experience": 8
+}
+```
+
+- `PUT /api/doctors/{id}`
+```json
+{
+  "firstName": "Rahul",
+  "lastName": "Sharma",
+  "email": "rahul.updated@example.com",
+  "specialization": "CARDIOLOGIST",
+  "phoneNumber": "9999999999",
+  "qualification": "MBBS, MD Cardiology",
+  "experience": 10,
+  "password": "password123"
+}
+```
+
+- `POST /api/doctors/{doctorId}/prescriptions`
+```json
+{
+  "patientId": "123e4567-e89b-12d3-a456-426614174000",
+  "diagnosis": "Stage 1 Hypertension",
+  "medicines": [
+    "Amlodipine 5mg - Once Daily",
+    "Telmisartan 40mg - Once Daily"
+  ],
+  "consultationFee": 800.0,
+  "notes": "Reduce salt intake, exercise 30 minutes daily, and return for follow-up after 2 weeks."
+}
+```
+
+### Analytics Service
+
+Base path: /api/analytics (through gateway) or /analytics on the service
+
+| Method | Endpoint | Description | Auth |
+| --- | --- | --- | --- |
+| GET | /api/analytics/patients | Get all patient analytics projections | Authenticated |
+| GET | /api/analytics/doctors | Get all doctor analytics projections | Authenticated |
+| GET | /api/analytics/prescriptions | Get all prescription analytics projections | Authenticated |
+| GET | /api/analytics/billings | Get all billing analytics projections | Authenticated |
 
 ---
 
