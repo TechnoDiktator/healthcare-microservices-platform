@@ -48,6 +48,48 @@ The complete Postman collection is available here:
 
 Import the collection into Postman and update the JWT token variables after logging in.
 
+---
+
+## 🔐 RBAC Access Matrix
+
+| Request category | Endpoint examples | Accessible by |
+| --- | --- | --- |
+| Authentication | `/auth/login`, `/auth/register`, `/auth/validate` | Public for login/register, authenticated users for validation |
+| Patient management | `/api/patients`, `/api/patients/{id}` | ADMIN, STAFF, DOCTOR |
+| Patient billing | `/api/patients/{patientId}/bills/{billId}`, `/api/patients/{patientId}/bills/{billId}/pay` | ADMIN, PATIENT |
+| Doctor management | `/api/doctors`, `/api/doctors/{id}` | ADMIN for create/update/delete; authenticated users for read/search |
+| Prescription workflows | `/api/doctors/{doctorId}/prescriptions`, `/api/doctors/prescriptions/{prescriptionId}` | Authenticated users |
+| Analytics reporting | `/api/analytics/**` | Authenticated users with valid JWT |
+
+> This RBAC matrix is derived from the service API tables below and clarifies which roles can access the main request categories.
+
+---
+
+## 🩺 Disease to Doctor Specialization Mapping
+
+The system includes a disease mapper that determines the appropriate doctor specialization from common patient complaint strings. If the complaint is not recognized, it defaults to `GENERAL_PHYSICIAN`.
+
+| Doctor specialization | Supported disease / complaint keywords |
+| --- | --- |
+| GENERAL_PHYSICIAN | fever, cold, flu, cough, viral infection, body pain, fatigue, headache, infection |
+| CARDIOLOGIST | chest pain, heart disease, high blood pressure, hypertension, arrhythmia, heart attack, palpitations |
+| NEUROLOGIST | migraine, epilepsy, stroke, parkinson, alzheimer, seizure, neuropathy, brain tumor |
+| ORTHOPEDIC | fracture, arthritis, joint pain, back pain, bone pain, sprain, ligament injury, osteoporosis |
+| DERMATOLOGIST | acne, eczema, psoriasis, skin allergy, rash, fungal infection, hair loss, vitiligo |
+| PEDIATRICIAN | child fever, newborn care, vaccination, child infection, growth issues |
+| GYNECOLOGIST | pregnancy, pcos, menstrual pain, infertility, ovarian cyst, uterine fibroids |
+| OPHTHALMOLOGIST | eye pain, cataract, glaucoma, blurred vision, vision loss, conjunctivitis |
+| ENT_SPECIALIST | ear infection, hearing loss, sinusitis, tonsillitis, sore throat, nose bleeding |
+| PSYCHIATRIST | depression, anxiety, panic attack, bipolar disorder, schizophrenia, insomnia |
+| UROLOGIST | kidney stone, uti, urinary infection, prostate enlargement, blood in urine, bladder infection |
+| ONCOLOGIST | breast cancer, lung cancer, blood cancer, colon cancer, tumor, cancer |
+| ENDOCRINOLOGIST | diabetes, thyroid, hypothyroidism, hyperthyroidism, hormonal imbalance, obesity |
+| PULMONOLOGIST | asthma, copd, tuberculosis, pneumonia, lung infection, shortness of breath |
+| GASTROENTEROLOGIST | gastritis, acid reflux, ulcer, ibs, crohn disease, liver disease, hepatitis, constipation |
+| NEPHROLOGIST | chronic kidney disease, kidney failure, proteinuria, dialysis, glomerulonephritis, nephritis |
+
+---
+
 ## 🏗️ Architecture
 
 The system is organized as a layered microservices architecture with a central gateway, domain services, event streaming, and separate data stores.
