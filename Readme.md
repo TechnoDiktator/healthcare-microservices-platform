@@ -6,7 +6,7 @@ This repository contains a distributed healthcare backend built with Spring Boot
 
 ## 📖 Overview
 
-The project demonstrates a realistic microservices setup for:
+My project implements a realistic microservices setup for:
 
 - authentication and authorization
 - patient management
@@ -14,13 +14,13 @@ The project demonstrates a realistic microservices setup for:
 - billing operations
 - analytics and event-driven reporting
 
-The system is designed so each service can evolve independently while still cooperating through clear integration boundaries.
+I designed the system so each service can evolve independently while still cooperating through clear integration boundaries.
 
 ---
 
 ## 🚀 Why You Should Hire Me
 
-This project demonstrates my ability to design and deliver an enterprise-grade distributed system with strong operational quality.
+This project proves I can design and deliver an enterprise-grade distributed system with strong operational quality.
 
 ### What I built
 
