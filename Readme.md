@@ -242,6 +242,37 @@ The Postman collection is also documented with example request screenshots.
 
 ---
 
+## 🔎 Tracing & Observability
+
+I instrumented the services with OpenTelemetry using the Micrometer tracing bridge and export traces to Jaeger (included in the Docker Compose stack). This lets you trace requests across the API Gateway, service REST endpoints, gRPC calls, and Kafka-driven workflows.
+
+- Jaeger container in Compose: `jaeger` (image: `jaegertracing/all-in-one`).
+- Jaeger endpoints mapped on localhost when Compose is running:
+  - UI: http://localhost:16686
+  - OTLP/gRPC receiver: 4317
+  - OTLP/HTTP receiver: 4318
+
+- Services and the API Gateway are configured to export OTLP traces to `http://jaeger:4318/v1/traces` (see each service `application.properties`/`application.yml`).
+- Sampling in development is configured to 100%: `management.tracing.sampling.probability=1.0`.
+
+Quick start to view traces:
+
+```bash
+# start the full stack (from repo root)
+docker compose up -d --build
+
+# exercise the system via the gateway (login, create patient, create prescription, etc.)
+
+# open the Jaeger UI in your browser
+open http://localhost:16686
+```
+
+In Jaeger UI use the service dropdown (for example `api-gateway`, `patient-service`, `doctor-service`, `billing-service`) and search a time window to see distributed traces for end-to-end requests.
+
+> Note: In Docker Compose the services resolve the Jaeger host as `jaeger` (Docker DNS). From your host machine you use `localhost:16686` to reach the Jaeger UI.
+
+---
+
 ## 🔄 Communication Patterns
 
 ### REST
