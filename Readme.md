@@ -408,21 +408,22 @@ curl -f http://localhost:<service-port>/actuator/health
 
 Each Spring Boot service exposes Actuator health and info endpoints, so you can verify runtime health directly from the container.
 
-Then access the services through the gateway and service-specific ports defined in the Docker Compose setup.
+Use the API Gateway as the public entrypoint for all client traffic. The gateway routes requests to the downstream services internally, so external clients should only use the gateway hostname and port.
 
-> Warning: Use the existing `pom.xml` files from the project and do not modify dependencies while running locally.
-> For the most reliable local environment, use Docker Compose as documented above.
+> Warning: Do not call service ports directly from outside Docker. The gateway is the supported public API surface.
 
-Example entry points:
+Gateway entry point:
 
 - API Gateway: http://localhost:4004
-- Auth Service: http://localhost:4005
-- Patient Service: http://localhost:4000
-- Doctor Service: http://localhost:8080
-- Billing Service: http://localhost:4001
-- Analytics Service: http://localhost:4002
 
-Use the gateway for most client requests so authentication, routing, and JWT handling happen consistently.
+Example public routes through the gateway:
+
+- Auth: http://localhost:4004/auth/login
+- Patient: http://localhost:4004/api/patients
+- Doctor: http://localhost:4004/api/doctors
+- Analytics: http://localhost:4004/api/analytics
+
+Service ports such as `4005`, `4000`, `8080`, `4001`, and `4002` are internal container/service ports used in Docker compose and should not be assumed accessible from the host.
 
 ---
 
