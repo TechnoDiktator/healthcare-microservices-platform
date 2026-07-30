@@ -90,14 +90,19 @@ spring:
             - JwtValidation
 
 management:
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+
+  otlp:
+    tracing:
+      endpoint: http://jaeger:4317
+
   endpoints:
     web:
       exposure:
         include: health,info
-
-  endpoint:
-    health:
-      show-details: always
 
 #
 #  This file is the heart of your API Gateway. Think of it as a reverse proxy with routing rules.
