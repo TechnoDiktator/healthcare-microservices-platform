@@ -209,9 +209,9 @@ The project includes Swagger/OpenAPI documentation and UI support.
 - Open the Swagger UI after starting the services at `http://localhost:4004/swagger-ui.html`
 - Use it to explore available endpoints, request schemas, and example payloads.
 
-![Swagger landing page](swagger-screenshots/landing-page.png)
+![Swagger landing page](screenshots/swagger-screenshots/landing-page.png)
 
-![Swagger request example](swagger-screenshots/request-example.png)
+![Swagger request example](screenshots/swagger-screenshots/request-example.png)
 
 ### Postman Screenshots
 
