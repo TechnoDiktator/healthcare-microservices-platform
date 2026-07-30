@@ -48,17 +48,6 @@ The complete Postman collection is available here:
 
 Import the collection into Postman and update the JWT token variables after logging in.
 
-### Swagger UI
-
-The project includes Swagger/OpenAPI documentation and UI support.
-
-- Open the Swagger UI after starting the services at `http://localhost:4004/swagger-ui.html`
-- Use it to explore available endpoints, request schemas, and example payloads.
-
-![Swagger landing page](swagger-screenshots/landing-page.png)
-
-![Swagger request example](swagger-screenshots/request-example.png)
-
 ---
 
 ## 🔐 RBAC Access Matrix
@@ -212,6 +201,17 @@ flowchart LR
 - The Doctor Service manages doctor-related domain operations and participates in cross-service validation flows.
 - The Billing Service handles billing records and publishes domain events after business operations.
 - The Analytics Service consumes Kafka events to maintain reporting and analytics data without direct coupling to the producing services.
+
+### Swagger UI
+
+The project includes Swagger/OpenAPI documentation and UI support.
+
+- Open the Swagger UI after starting the services at `http://localhost:4004/swagger-ui.html`
+- Use it to explore available endpoints, request schemas, and example payloads.
+
+![Swagger landing page](swagger-screenshots/landing-page.png)
+
+![Swagger request example](swagger-screenshots/request-example.png)
 
 ### Postman Screenshots
 
