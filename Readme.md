@@ -221,11 +221,15 @@ The Postman collection is also documented with example request screenshots.
 - `postman_screenshots/auth/login.png`
 - `postman_screenshots/patient-service/create-patient.png`
 
-![Postman all requests](postman_screenshots/allrequests.png)
+- `screenshots/allrequests.png`
+- `screenshots/auth/login.png`
+- `screenshots/patient-service/create-patient.png`
 
-![Postman auth login](postman_screenshots/auth/login.png)
+![Postman all requests](screenshots/allrequests.png)
 
-![Postman create patient](postman_screenshots/patient-service/create-patient.png)
+![Postman auth login](screenshots/auth/login.png)
+
+![Postman create patient](screenshots/patient-service/create-patient.png)
 
 ---
 
