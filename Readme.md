@@ -271,6 +271,8 @@ In Jaeger UI use the service dropdown (for example `api-gateway`, `patient-servi
 
 > Note: In Docker Compose the services resolve the Jaeger host as `jaeger` (Docker DNS). From your host machine you use `localhost:16686` to reach the Jaeger UI.
 
+![Jaeger distributed tracing](screenshots/jaeger-screenshots/jaeger-distributed-tracing.png)
+
 ---
 
 ## 🔄 Communication Patterns
