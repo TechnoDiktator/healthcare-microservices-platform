@@ -59,20 +59,6 @@ The project includes Swagger/OpenAPI documentation and UI support.
 
 ![Swagger request example](swagger-screenshots/request-example.png)
 
-### Postman Screenshots
-
-The Postman collection is also documented with example request screenshots.
-
-- `postman_screenshots/allrequests.png`
-- `postman_screenshots/auth/login.png`
-- `postman_screenshots/patient-service/create-patient.png`
-
-![Postman all requests](postman_screenshots/allrequests.png)
-
-![Postman auth login](postman_screenshots/auth/login.png)
-
-![Postman create patient](postman_screenshots/patient-service/create-patient.png)
-
 ---
 
 ## 🔐 RBAC Access Matrix
@@ -226,6 +212,20 @@ flowchart LR
 - The Doctor Service manages doctor-related domain operations and participates in cross-service validation flows.
 - The Billing Service handles billing records and publishes domain events after business operations.
 - The Analytics Service consumes Kafka events to maintain reporting and analytics data without direct coupling to the producing services.
+
+### Postman Screenshots
+
+The Postman collection is also documented with example request screenshots.
+
+- `postman_screenshots/allrequests.png`
+- `postman_screenshots/auth/login.png`
+- `postman_screenshots/patient-service/create-patient.png`
+
+![Postman all requests](postman_screenshots/allrequests.png)
+
+![Postman auth login](postman_screenshots/auth/login.png)
+
+![Postman create patient](postman_screenshots/patient-service/create-patient.png)
 
 ---
 
